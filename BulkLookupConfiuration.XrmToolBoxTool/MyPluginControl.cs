@@ -1,14 +1,13 @@
-﻿using McTools.Xrm.Connection;
+﻿using BulkLookupConfiguration.XrmToolBoxTool.forms;
+using BulkLookupConfiguration.XrmToolBoxTool.model;
+using McTools.Xrm.Connection;
+using Microsoft.Crm.Sdk.Messages;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using XrmToolBox.Extensibility;
 
@@ -25,6 +24,12 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
 
         private void MyPluginControl_Load(object sender, EventArgs e)
         {
+            LoadSettings();
+            ExecuteMethod(WhoAmI);
+        }
+
+        private void LoadSettings()
+        {
             ShowInfoNotification("This is a notification that can lead to XrmToolBox repository", new Uri("https://github.com/MscrmTools/XrmToolBox"));
 
             // Loads or creates the settings for the plugin
@@ -38,6 +43,20 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
             {
                 LogInfo("Settings found and loaded");
             }
+        }
+
+        private void WhoAmI()
+        {
+            Service.Execute(new WhoAmIRequest());
+        }
+
+        private void OnSolutionsSelected(List<Solution> selectedSolutions)
+        {
+            var names = string.Join(", ", selectedSolutions.Select(s => s.FriendlyName));
+            MessageBox.Show($"You selected {selectedSolutions.Count} solution(s):\n\n{names}",
+                "Solutions Selected", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+            // TODO: Your real work starts here — load lookup fields, etc.
         }
 
         private void tsbClose_Click(object sender, EventArgs e)
@@ -101,6 +120,62 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
             {
                 mySettings.LastUsedOrganizationWebappUrl = detail.WebApplicationUrl;
                 LogInfo("Connection has changed to: {0}", detail.WebApplicationUrl);
+            }
+        }
+
+        private async void tsb_opensolutions_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                WorkAsync(new WorkAsyncInfo
+                {
+                    Message = "Loading solutions...",
+                    Work = (worker, args) =>
+                    {
+                        var query = new QueryExpression("solution")
+                        {
+                            ColumnSet = new ColumnSet("friendlyname", "uniquename", "ismanaged", "version"),
+                            Criteria = new FilterExpression
+                            {
+                                Conditions =
+                        {
+                            new ConditionExpression("isvisible", ConditionOperator.Equal, true),
+                            new ConditionExpression("uniquename", ConditionOperator.NotEqual, "Default")
+                        }
+                            },
+                            Orders = { new OrderExpression("friendlyname", OrderType.Ascending) }
+                        };
+
+                        args.Result = Service.RetrieveMultiple(query);
+                    },
+                    PostWorkCallBack = (args) =>
+                    {
+                        if (args.Error != null)
+                        {
+                            MessageBox.Show(args.Error.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return;
+                        }
+                       
+                        var solutions = ((EntityCollection)args.Result).Entities
+                           .Select(record => record.ToEntity<Solution>())
+                           .OrderBy(s => s.FriendlyName)
+                           .ToList();
+
+                        using (var picker = new SolutionPicker(solutions))
+                        {
+                            picker.StartPosition = FormStartPosition.CenterParent;
+                            if (picker.ShowDialog(this) == DialogResult.OK && picker.SelectedSolutions.Any())
+                            {
+                                // Do whatever you want with the selected solution(s)
+                                OnSolutionsSelected(picker.SelectedSolutions);
+                            }
+                        }
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }

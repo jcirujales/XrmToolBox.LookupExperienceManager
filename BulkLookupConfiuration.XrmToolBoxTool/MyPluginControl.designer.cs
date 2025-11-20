@@ -76,11 +76,12 @@
             // tsb_opensolutions
             // 
             this.tsb_opensolutions.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsb_opensolutions.Image = global::BulkLookupConfiuration.XrmToolBoxTool.Properties.Resources.solutions_32;
+            this.tsb_opensolutions.Image = global::BulkLookupConfiguration.XrmToolBoxTool.Properties.Resources.solutions_32;
             this.tsb_opensolutions.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.tsb_opensolutions.Name = "tsb_opensolutions";
             this.tsb_opensolutions.Size = new System.Drawing.Size(36, 36);
             this.tsb_opensolutions.ToolTipText = "Open Solutions";
+            this.tsb_opensolutions.Click += new System.EventHandler(this.tsb_opensolutions_Click);
             // 
             // toolStripSeparator1
             // 

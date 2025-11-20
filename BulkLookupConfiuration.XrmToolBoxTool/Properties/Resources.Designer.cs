@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace BulkLookupConfiuration.XrmToolBoxTool.Properties {
+namespace BulkLookupConfiguration.XrmToolBoxTool.Properties {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace BulkLookupConfiuration.XrmToolBoxTool.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("BulkLookupConfiuration.XrmToolBoxTool.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("BulkLookupConfiguration.XrmToolBoxTool.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;

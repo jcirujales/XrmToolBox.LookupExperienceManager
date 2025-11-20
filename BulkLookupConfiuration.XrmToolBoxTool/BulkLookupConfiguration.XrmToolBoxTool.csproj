@@ -8,8 +8,8 @@
     <ProjectGuid>{B328DFF0-65F5-406C-8B6A-9223B4AD84A7}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>BulkLookupConfiuration.XrmToolBoxTool</RootNamespace>
-    <AssemblyName>BulkLookupConfiuration.XrmToolBoxTool</AssemblyName>
+    <RootNamespace>BulkLookupConfiguration.XrmToolBoxTool</RootNamespace>
+    <AssemblyName>BulkLookupConfiguration.XrmToolBoxTool</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <NuGetPackageImportStamp>
@@ -239,6 +239,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="forms\SolutionPicker.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="forms\SolutionPicker.Designer.cs">
+      <DependentUpon>SolutionPicker.cs</DependentUpon>
+    </Compile>
+    <Compile Include="model\Solution.cs" />
     <Compile Include="MyPlugin.cs" />
     <Compile Include="MyPluginControl.cs">
       <SubType>UserControl</SubType>
