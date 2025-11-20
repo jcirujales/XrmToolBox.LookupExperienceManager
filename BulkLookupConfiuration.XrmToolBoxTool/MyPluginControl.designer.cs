@@ -28,11 +28,12 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MyPluginControl));
             this.toolStripMenu = new System.Windows.Forms.ToolStrip();
             this.tsbClose = new System.Windows.Forms.ToolStripButton();
-            this.tsbSample = new System.Windows.Forms.ToolStripButton();
             this.tssSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.tsbSample = new System.Windows.Forms.ToolStripButton();
+            this.tsb_opensolutions = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripMenu.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -40,13 +41,14 @@
             // 
             this.toolStripMenu.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.toolStripMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-                this.tsbClose,
-                this.tssSeparator1,
-                this.tsbSample});
+            this.tsbClose,
+            this.tssSeparator1,
+            this.tsb_opensolutions,
+            this.toolStripSeparator1,
+            this.tsbSample});
             this.toolStripMenu.Location = new System.Drawing.Point(0, 0);
             this.toolStripMenu.Name = "toolStripMenu";
-            this.toolStripMenu.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
-            this.toolStripMenu.Size = new System.Drawing.Size(839, 31);
+            this.toolStripMenu.Size = new System.Drawing.Size(839, 41);
             this.toolStripMenu.TabIndex = 4;
             this.toolStripMenu.Text = "toolStrip1";
             // 
@@ -54,22 +56,36 @@
             // 
             this.tsbClose.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.tsbClose.Name = "tsbClose";
-            this.tsbClose.Size = new System.Drawing.Size(28, 28);
+            this.tsbClose.Size = new System.Drawing.Size(129, 36);
             this.tsbClose.Text = "Close this tool";
             this.tsbClose.Click += new System.EventHandler(this.tsbClose_Click);
             // 
             // tssSeparator1
             // 
             this.tssSeparator1.Name = "tssSeparator1";
-            this.tssSeparator1.Size = new System.Drawing.Size(6, 31);
+            this.tssSeparator1.Size = new System.Drawing.Size(6, 41);
             // 
             // tsbSample
             // 
             this.tsbSample.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.tsbSample.Name = "tsbSample";
-            this.tsbSample.Size = new System.Drawing.Size(28, 28);
+            this.tsbSample.Size = new System.Drawing.Size(68, 36);
             this.tsbSample.Text = "Try me";
             this.tsbSample.Click += new System.EventHandler(this.tsbSample_Click);
+            // 
+            // tsb_opensolutions
+            // 
+            this.tsb_opensolutions.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsb_opensolutions.Image = global::BulkLookupConfiuration.XrmToolBoxTool.Properties.Resources.solutions_32;
+            this.tsb_opensolutions.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            this.tsb_opensolutions.Name = "tsb_opensolutions";
+            this.tsb_opensolutions.Size = new System.Drawing.Size(36, 36);
+            this.tsb_opensolutions.ToolTipText = "Open Solutions";
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 41);
             // 
             // MyPluginControl
             // 
@@ -77,7 +93,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.toolStripMenu);
             this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.Name = "SampleTool";
+            this.Name = "MyPluginControl";
             this.Size = new System.Drawing.Size(839, 462);
             this.Load += new System.EventHandler(this.MyPluginControl_Load);
             this.toolStripMenu.ResumeLayout(false);
@@ -92,5 +108,7 @@
         private System.Windows.Forms.ToolStripButton tsbClose;
         private System.Windows.Forms.ToolStripButton tsbSample;
         private System.Windows.Forms.ToolStripSeparator tssSeparator1;
+        private System.Windows.Forms.ToolStripButton tsb_opensolutions;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
     }
 }
