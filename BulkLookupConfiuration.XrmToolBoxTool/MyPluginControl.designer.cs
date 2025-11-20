@@ -1,4 +1,4 @@
-﻿namespace BulkLookupConfiuration.XrmToolBoxTool
+﻿namespace BulkLookupConfiguration.XrmToolBoxTool
 {
     partial class MyPluginControl
     {

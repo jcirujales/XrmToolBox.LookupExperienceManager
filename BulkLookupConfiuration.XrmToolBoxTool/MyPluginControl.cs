@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using XrmToolBox.Extensibility;
 
-namespace BulkLookupConfiuration.XrmToolBoxTool
+namespace BulkLookupConfiguration.XrmToolBoxTool
 {
     public partial class MyPluginControl : PluginControlBase
     {

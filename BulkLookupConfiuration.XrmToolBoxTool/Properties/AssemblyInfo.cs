@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("BulkLookupConfiuration.XrmToolBoxTool")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("BulkLookupConfiguration.XrmToolBoxTool")]
+[assembly: AssemblyDescription("Used to update lookup control configurations in bulk")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("BulkLookupConfiuration.XrmToolBoxTool")]
+[assembly: AssemblyProduct("BulkLookupConfiguration.XrmToolBoxTool")]
 [assembly: AssemblyCopyright("Copyright ©  2025")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
