@@ -14,27 +14,27 @@ using Label = System.Windows.Forms.Label;
 
 namespace BulkLookupConfiguration.XrmToolBoxTool
 {
-    public partial class MyPluginControl : PluginControlBase
+    public partial class BulkLookupConfigurationControl : PluginControlBase
     {
         private Settings mySettings;
 
         public DataGridView GridTables { get; private set; }
         public DataGridView GridLookups { get; private set; }
 
-        public MyPluginControl()
+        public BulkLookupConfigurationControl()
         {
-            // No more InitializeComponent() — everything is modern code!
             SetupPluginControl();
             SetupModernLayout();
+
+            this.Load += BulkLookupConfigurationControl_Load;
+            this.OnCloseTool += BulkLookupConfigurationControl_OnCloseTool;
         }
 
         private void SetupPluginControl()
         {
-            // Replaces everything that was in InitializeComponent()
             this.Dock = DockStyle.Fill;
             this.Margin = new Padding(0);
 
-            // === Modern Toolbar (replaces the old designer toolbar) ===
             var toolbar = new ToolStrip
             {
                 Dock = DockStyle.Top,
@@ -86,7 +86,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
             public override Color ImageMarginGradientEnd => Color.FromArgb(45, 50, 60);
         }
 
-        private void MyPluginControl_Load(object sender, EventArgs e)
+        private void BulkLookupConfigurationControl_Load(object sender, EventArgs e)
         {
             LoadSettings();
             ExecuteMethod(WhoAmI);
@@ -150,7 +150,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void MyPluginControl_OnCloseTool(object sender, EventArgs e)
+        private void BulkLookupConfigurationControl_OnCloseTool(object sender, EventArgs e)
         {
             // Before leaving, save the settings
             SettingsManager.Instance.Save(GetType(), mySettings);
@@ -184,7 +184,6 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
                             Conditions =
                             {
                                 new ConditionExpression("isvisible", ConditionOperator.Equal, true),
-                                new ConditionExpression("uniquename", ConditionOperator.NotEqual, "Default")
                             }
                         },
                         Orders = { new OrderExpression("friendlyname", OrderType.Ascending) }
@@ -283,7 +282,6 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
 
             this.Controls.Add(mainLayout);
             this.Controls.SetChildIndex(mainLayout, 0);
-            this.toolStripMenu?.BringToFront();
         }
 
         private DataGridView CreateStyledGrid()

@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("BulkLookupConfiguration.XrmToolBoxTool")]
 [assembly: AssemblyDescription("Used to update lookup control configurations in bulk")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("John Cirujales")]
 [assembly: AssemblyProduct("BulkLookupConfiguration.XrmToolBoxTool")]
 [assembly: AssemblyCopyright("Copyright ©  2025")]
 [assembly: AssemblyTrademark("")]
