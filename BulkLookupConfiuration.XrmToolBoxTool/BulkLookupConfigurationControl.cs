@@ -20,7 +20,6 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
     public partial class BulkLookupConfigurationControl : PluginControlBase
     {
         private Settings mySettings;
-
         public DataGridView GridTables { get; private set; }
         public DataGridView GridLookups { get; private set; }
 
@@ -55,11 +54,11 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
             };
             btnClose.Click += (s, e) => CloseTool();
 
-            var btnSolutions = new ToolStripButton("Select Solutions")
+            var btnSolutions = new ToolStripButton("Select Solution")
             {
                 Image = Properties.Resources.solutions_32,
                 ImageScaling = ToolStripItemImageScaling.None,
-                ToolTipText = "Select solutions to scan"
+                ToolTipText = "Select a solution to analyze"
             };
             btnSolutions.Click += tsb_opensolutions_Click;
 
@@ -79,7 +78,6 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
             this.Controls.Add(toolbar);
         }
 
-        // Custom colors for modern dark toolbar
         private class CustomProfessionalColors : ProfessionalColorTable
         {
             public override Color MenuItemSelected => Color.FromArgb(0, 122, 204);
@@ -97,9 +95,8 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
 
         private void LoadSettings()
         {
-            ShowInfoNotification("This is a notification that can lead to XrmToolBox repository", new Uri("https://github.com/MscrmTools/XrmToolBox"));
+            ShowInfoNotification("Welcome to Lookup Experience Manager", new Uri("https://github.com/MscrmTools/XrmToolBox"));
 
-            // Loads or creates the settings for the plugin
             if (!SettingsManager.Instance.TryLoad(GetType(), out mySettings))
             {
                 mySettings = new Settings();
@@ -107,7 +104,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
             }
             else
             {
-                LogInfo("Settings found and loaded");
+                LogInfo("Settings loaded successfully");
             }
         }
 
@@ -128,34 +125,34 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
                 Message = $"Loading tables from solution: {solutionName}...",
                 Work = (worker, args) =>
                 {
-                    // Step 1: Get solution components (componenttype = 1 = Entity)
+                    // Get solution components (Entity = 1)
                     var componentQuery = new QueryExpression("solutioncomponent")
                     {
                         ColumnSet = new ColumnSet("objectid"),
                         Criteria = new FilterExpression
                         {
                             Conditions =
-                    {
-                        new ConditionExpression("solutionid", ConditionOperator.Equal, selectedSolution.Id),
-                        new ConditionExpression("componenttype", ConditionOperator.Equal, 1) // Entity
-                    }
+                            {
+                                new ConditionExpression("solutionid", ConditionOperator.Equal, selectedSolution.Id),
+                                new ConditionExpression("componenttype", ConditionOperator.Equal, 1)
+                            }
                         }
                     };
 
                     var components = Service.RetrieveMultiple(componentQuery);
-                    var entityIds = components.Entities
+                    var metadataIds = components.Entities
                         .Select(c => c.GetAttributeValue<Guid>("objectid"))
                         .Where(id => id != Guid.Empty)
                         .ToList();
 
-                    if (!entityIds.Any())
+                    if (!metadataIds.Any())
                     {
                         args.Result = new List<EntityMetadata>();
                         return;
                     }
 
-                    // Step 2: Query EntityMetadata using entityid (Guid)
-                    var metadataRequest = new RetrieveMetadataChangesRequest
+                    // Retrieve EntityMetadata using MetadataId
+                    var request = new RetrieveMetadataChangesRequest
                     {
                         Query = new EntityQueryExpression
                         {
@@ -163,24 +160,20 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
                             {
                                 Conditions =
                                 {
-                                    new MetadataConditionExpression("MetadataId", MetadataConditionOperator.In, entityIds.ToArray())
+                                    new MetadataConditionExpression("MetadataId", MetadataConditionOperator.In, metadataIds.ToArray())
                                 }
                             },
                             Properties = new MetadataPropertiesExpression
                             {
-                                AllProperties = false,
                                 PropertyNames = { "LogicalName", "DisplayName", "SchemaName" }
                             }
                         }
                     };
 
-                    var response = (RetrieveMetadataChangesResponse)Service.Execute(metadataRequest);
-
-                    var metadataList = response.EntityMetadata
+                    var response = (RetrieveMetadataChangesResponse)Service.Execute(request);
+                    args.Result = response.EntityMetadata
                         .OrderBy(m => m.DisplayName?.UserLocalizedLabel?.Label ?? m.LogicalName)
                         .ToList();
-
-                    args.Result = metadataList;
                 },
                 PostWorkCallBack = args =>
                 {
@@ -198,7 +191,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
 
                         if (!entities.Any())
                         {
-                            GridTables.Rows.Add("No tables found", "(This solution may contain only system entities)");
+                            GridTables.Rows.Add("No custom tables found", "(in this solution)");
                             return;
                         }
 
@@ -207,7 +200,6 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
                             var displayName = entity.DisplayName?.UserLocalizedLabel?.Label
                                               ?? entity.SchemaName
                                               ?? entity.LogicalName;
-
                             GridTables.Rows.Add(displayName, entity.LogicalName);
                         }
 
@@ -216,7 +208,6 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
                 }
             });
         }
-        private void tsbClose_Click(object sender, EventArgs e) => CloseTool();
 
         private void tsbSample_Click(object sender, EventArgs e) => ExecuteMethod(GetAccounts);
 
@@ -259,7 +250,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
             if (mySettings != null && detail != null)
             {
                 mySettings.LastUsedOrganizationWebappUrl = detail.WebApplicationUrl;
-                LogInfo("Connection has changed to: {0}", detail.WebApplicationUrl);
+                LogInfo("Connection updated to: {0}", detail.WebApplicationUrl);
             }
         }
 
@@ -272,13 +263,10 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
                 {
                     var query = new QueryExpression("solution")
                     {
-                        ColumnSet = new ColumnSet("friendlyname", "uniquename", "ismanaged", "version"),
+                        ColumnSet = new ColumnSet("friendlyname", "uniquename", "ismanaged", "version", "solutionid"),
                         Criteria = new FilterExpression
                         {
-                            Conditions =
-                            {
-                                new ConditionExpression("isvisible", ConditionOperator.Equal, true),
-                            }
+                            Conditions = { new ConditionExpression("isvisible", ConditionOperator.Equal, true) }
                         },
                         Orders = { new OrderExpression("friendlyname", OrderType.Ascending) }
                     };
@@ -303,8 +291,8 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
                         sol["ismanaged"] = entity.GetAttributeValue<bool>("ismanaged");
                         return sol;
                     })
-                    .OrderBy(s => s.FriendlyName)
-                    .ToList();
+                        .OrderBy(s => s.FriendlyName)
+                        .ToList();
 
                     this.BeginInvoke((MethodInvoker)(() =>
                     {
@@ -321,7 +309,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
         }
 
         // ===================================================================
-        // MODERN UI SETUP — This is the beautiful part
+        // FINAL MODERN UI — No overlap, no hacks, perfect
         // ===================================================================
         private void SetupModernLayout()
         {
@@ -333,32 +321,35 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
                 Padding = new Padding(0),
                 BackColor = Color.FromArgb(40, 44, 52)
             };
+
             for (int i = 0; i < 3; i++)
                 mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33F));
 
-            // Left: Tables
+            // LEFT: Tables
             var panelTables = CreateModernPanel("Tables", "Select one or more tables to analyze");
             GridTables = CreateStyledGrid();
-            GridTables.Columns.AddRange(new[]
+            GridTables.Columns.AddRange(new DataGridViewColumn[]
             {
-                new DataGridViewTextBoxColumn { HeaderText = "Display Name",  DataPropertyName = "DisplayName", FillWeight = 55 },
-                new DataGridViewTextBoxColumn { HeaderText = "Schema Name",   DataPropertyName = "LogicalName", FillWeight = 45 }
+                new DataGridViewTextBoxColumn { HeaderText = "Display Name", DataPropertyName = "DisplayName", FillWeight = 55 },
+                new DataGridViewTextBoxColumn { HeaderText = "Schema Name", DataPropertyName = "LogicalName", FillWeight = 45 }
             });
             panelTables.Controls.Add(GridTables);
+            panelTables.Controls.SetChildIndex(GridTables, 0);
 
-            // Middle: Lookup Controls
+            // MIDDLE: Lookup Controls
             var panelLookups = CreateModernPanel("Lookup Controls", "Select lookup fields to configure");
             GridLookups = CreateStyledGrid();
-            GridLookups.Columns.AddRange(new[]
+            GridLookups.Columns.AddRange(new DataGridViewColumn[]
             {
-                new DataGridViewTextBoxColumn { HeaderText = "Control Name",   FillWeight = 30 },
-                new DataGridViewTextBoxColumn { HeaderText = "Schema Name",    FillWeight = 30 },
-                new DataGridViewTextBoxColumn { HeaderText = "Form",           FillWeight = 25 },
-                new DataGridViewTextBoxColumn { HeaderText = "Target Entity",  FillWeight = 15 }
+                new DataGridViewTextBoxColumn { HeaderText = "Control Name", FillWeight = 30 },
+                new DataGridViewTextBoxColumn { HeaderText = "Schema Name", FillWeight = 30 },
+                new DataGridViewTextBoxColumn { HeaderText = "Form", FillWeight = 25 },
+                new DataGridViewTextBoxColumn { HeaderText = "Target Entity", FillWeight = 15 }
             });
             panelLookups.Controls.Add(GridLookups);
+            panelLookups.Controls.SetChildIndex(GridLookups, 0);
 
-            // Right: Configuration (blank for now)
+            // RIGHT: Configuration
             var panelConfig = CreateModernPanel("Configuration", "Settings will appear when lookup(s) selected");
             var lbl = new Label
             {
@@ -369,6 +360,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
                 TextAlign = ContentAlignment.MiddleCenter
             };
             panelConfig.Controls.Add(lbl);
+            panelConfig.Controls.SetChildIndex(lbl, 0);
 
             mainLayout.Controls.Add(panelTables, 0, 0);
             mainLayout.Controls.Add(panelLookups, 1, 0);
@@ -411,16 +403,14 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
                     Padding = new Padding(12, 0, 0, 0)
                 }
             };
-
             // This line must be OUTSIDE the initializer
             grid.RowTemplate.Height = 36;
-
             return grid;
         }
 
         private Panel CreateModernPanel(string title, string subtitle)
         {
-            var panel = new Panel { Dock = DockStyle.Fill, Padding = new Padding(1) };
+            var panel = new Panel { Dock = DockStyle.Fill, Padding = new Padding(0) };
 
             var header = new Panel
             {
@@ -437,6 +427,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
                 Location = new Point(16, 14),
                 AutoSize = true
             };
+
             var lblSubtitle = new Label
             {
                 Text = subtitle,
