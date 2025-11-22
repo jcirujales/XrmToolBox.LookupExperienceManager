@@ -123,7 +123,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
             }
         }
 
-        private async void tsb_opensolutions_Click(object sender, EventArgs e)
+        private void tsb_opensolutions_Click(object sender, EventArgs e)
         {
             try
             {
@@ -161,15 +161,14 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
                            .OrderBy(s => s.FriendlyName)
                            .ToList();
 
-                        using (var picker = new SolutionPicker(solutions))
+                        this.Invoke((MethodInvoker)(() =>
                         {
-                            picker.StartPosition = FormStartPosition.CenterParent;
-                            if (picker.ShowDialog(this) == DialogResult.OK && picker.SelectedSolutions.Any())
+                            using (var picker = new SolutionPicker(solutions))
                             {
-                                // Do whatever you want with the selected solution(s)
-                                OnSolutionsSelected(picker.SelectedSolutions);
+                                if (picker.ShowDialog(this) == DialogResult.OK)
+                                    OnSolutionsSelected(picker.SelectedSolutions);
                             }
-                        }
+                        }));
                     }
                 });
             }

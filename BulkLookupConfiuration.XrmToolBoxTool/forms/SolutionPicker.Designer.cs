@@ -57,6 +57,7 @@
             this.btnOK.Size = new System.Drawing.Size(75, 30);
             this.btnOK.Text = "OK";
             this.btnOK.UseVisualStyleBackColor = true;
+            this.btnOK.Click += new System.EventHandler(this.btnOK_Click);
 
             // btnCancel
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
@@ -64,6 +65,7 @@
             this.btnCancel.Size = new System.Drawing.Size(75, 30);
             this.btnCancel.Text = "Cancel";
             this.btnCancel.UseVisualStyleBackColor = true;
+            this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
 
             // Form
             this.AcceptButton = btnOK;
