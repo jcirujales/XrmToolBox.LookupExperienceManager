@@ -242,9 +242,6 @@
     <Compile Include="forms\SolutionPicker.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="forms\SolutionPicker.Designer.cs">
-      <DependentUpon>SolutionPicker.cs</DependentUpon>
-    </Compile>
     <Compile Include="model\Solution.cs" />
     <Compile Include="MyPlugin.cs" />
     <Compile Include="MyPluginControl.cs">
