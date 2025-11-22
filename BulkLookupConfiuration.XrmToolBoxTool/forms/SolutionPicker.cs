@@ -9,19 +9,17 @@ namespace BulkLookupConfiguration.XrmToolBoxTool.forms
 {
     public partial class SolutionPicker : Form
     {
-        public List<Solution> SelectedSolutions { get; private set; } = new List<Solution>();
+        public Solution SelectedSolution { get; private set; }
 
-        private readonly CheckedListBox checkedListBoxSolutions;
+        private readonly ListBox listBoxSolutions;
 
         public SolutionPicker(List<Solution> solutions)
         {
-            // Modern form setup
-            this.Text = "Select Solutions";
+            this.Text = "Select Solution";
             this.Size = new Size(560, 520);
             this.StartPosition = FormStartPosition.CenterParent;
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
-            this.MaximizeBox = false;
-            this.MinimizeBox = false;
+            this.MaximizeBox = this.MinimizeBox = false;
             this.BackColor = Color.FromArgb(40, 44, 52);
             this.ForeColor = Color.White;
             this.Font = new Font("Segoe UI", 9.5F);
@@ -36,7 +34,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool.forms
             };
             var lblTitle = new Label
             {
-                Text = "Select Solution(s)",
+                Text = "Select a Solution",
                 Font = new Font("Segoe UI Semibold", 16F),
                 ForeColor = Color.White,
                 AutoSize = true,
@@ -44,7 +42,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool.forms
             };
             var lblSubtitle = new Label
             {
-                Text = "Check one or more solutions to analyze lookup fields",
+                Text = "Choose the solution to analyze lookup controls",
                 Font = new Font("Segoe UI", 9F),
                 ForeColor = Color.FromArgb(220, 240, 255),
                 AutoSize = true,
@@ -53,31 +51,69 @@ namespace BulkLookupConfiguration.XrmToolBoxTool.forms
             header.Controls.Add(lblTitle);
             header.Controls.Add(lblSubtitle);
 
-            // CheckedListBox (modern dark style)
-            checkedListBoxSolutions = new CheckedListBox
+            // ListBox – clean, single-select, beautiful
+            listBoxSolutions = new ListBox
             {
                 Dock = DockStyle.Fill,
                 BackColor = Color.FromArgb(52, 58, 70),
                 ForeColor = Color.White,
                 BorderStyle = BorderStyle.None,
-                CheckOnClick = true,
-                FormattingEnabled = true,
-                ItemHeight = 32,
-                Margin = new Padding(20)
+                ItemHeight = 40,
+                SelectionMode = SelectionMode.One,
+                DrawMode = DrawMode.OwnerDrawFixed
             };
-            checkedListBoxSolutions.Items.AddRange(solutions.ToArray());
 
-            // Buttons panel
-            var btnPanel = new Panel
+            // Custom drawing for modern look
+            listBoxSolutions.DrawItem += (s, e) =>
             {
-                Dock = DockStyle.Bottom,
-                Height = 70,
-                Padding = new Padding(20, 15, 20, 15)
+                if (e.Index < 0) return;
+
+                var item = solutions[e.Index];
+                var text = item.FriendlyName ?? item.UniqueName;
+
+                e.DrawBackground();
+                var brush = (e.State & DrawItemState.Selected) == DrawItemState.Selected
+                    ? Brushes.White
+                    : Brushes.LightGray;
+
+                var bg = (e.State & DrawItemState.Selected) == DrawItemState.Selected
+                    ? Color.FromArgb(0, 122, 204)
+                    : Color.FromArgb(52, 58, 70);
+
+                using (var bgBrush = new SolidBrush(bg))
+                    e.Graphics.FillRectangle(bgBrush, e.Bounds);
+
+                e.Graphics.DrawString(
+                    text,
+                    new Font("Segoe UI", 10F),
+                    brush,
+                    new PointF(e.Bounds.X + 16, e.Bounds.Y + 10)
+                );
+
+                e.DrawFocusRectangle();
             };
+
+            listBoxSolutions.Items.AddRange(solutions.ToArray());
+
+            // Double-click = OK
+            listBoxSolutions.DoubleClick += (s, e) =>
+            {
+                if (listBoxSolutions.SelectedItem is Solution sol)
+                {
+                    SelectedSolution = sol;
+                    DialogResult = DialogResult.OK;
+                    Close();
+                }
+            };
+
+            // Buttons
+            var btnPanel = new Panel { Dock = DockStyle.Bottom, Height = 70, Padding = new Padding(20, 15, 20, 15) };
+
             var btnOK = new Button
             {
                 Text = "OK",
                 DialogResult = DialogResult.OK,
+                Enabled = false,
                 FlatStyle = FlatStyle.Flat,
                 BackColor = Color.FromArgb(0, 122, 204),
                 ForeColor = Color.White,
@@ -86,12 +122,6 @@ namespace BulkLookupConfiguration.XrmToolBoxTool.forms
                 Location = new Point(340, 15)
             };
             btnOK.FlatAppearance.BorderSize = 0;
-            btnOK.Click += (s, e) =>
-            {
-                SelectedSolutions = checkedListBoxSolutions.CheckedItems
-                    .Cast<Solution>()
-                    .ToList();
-            };
 
             var btnCancel = new Button
             {
@@ -100,28 +130,42 @@ namespace BulkLookupConfiguration.XrmToolBoxTool.forms
                 FlatStyle = FlatStyle.Flat,
                 BackColor = Color.FromArgb(70, 76, 90),
                 ForeColor = Color.White,
-                Font = new Font("Segoe UI", 10F),
                 Size = new Size(100, 38),
                 Location = new Point(450, 15)
             };
             btnCancel.FlatAppearance.BorderSize = 0;
 
+            // Enable OK button only when something is selected
+            listBoxSolutions.SelectedIndexChanged += (s, e) =>
+            {
+                var hasSelection = listBoxSolutions.SelectedItem != null;
+                btnOK.Enabled = hasSelection;
+                if (hasSelection)
+                    SelectedSolution = (Solution)listBoxSolutions.SelectedItem;
+            };
+
+            btnOK.Click += (s, e) =>
+            {
+                if (listBoxSolutions.SelectedItem is Solution sol)
+                    SelectedSolution = sol;
+            };
+
             btnPanel.Controls.Add(btnOK);
             btnPanel.Controls.Add(btnCancel);
 
-            // Main layout
+            // Layout
             var layout = new TableLayoutPanel
             {
                 Dock = DockStyle.Fill,
                 RowCount = 3,
                 Padding = new Padding(0)
             };
-            layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 80));     // header
-            layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));    // list
-            layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 70));     // buttons
+            layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 80));
+            layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 70));
 
             layout.Controls.Add(header, 0, 0);
-            layout.Controls.Add(checkedListBoxSolutions, 0, 1);
+            layout.Controls.Add(listBoxSolutions, 0, 1);
             layout.Controls.Add(btnPanel, 0, 2);
 
             this.Controls.Add(layout);

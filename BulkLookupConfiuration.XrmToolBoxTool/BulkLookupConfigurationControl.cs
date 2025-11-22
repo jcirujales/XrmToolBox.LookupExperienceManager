@@ -113,15 +113,17 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
             Service.Execute(new WhoAmIRequest());
         }
 
-        private void OnSolutionsSelected(List<Solution> selectedSolutions)
+        private void OnSolutionSelected(Solution selectedSolution)
         {
-            var names = string.Join(", ", selectedSolutions.Select(s => s.FriendlyName));
-            MessageBox.Show($"You selected {selectedSolutions.Count} solution(s):\n\n{names}",
-                "Solutions Selected", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show($"Selected solution:\n\n" +
+                            $"{selectedSolution.FriendlyName ?? selectedSolution.UniqueName} " +
+                            $"v{selectedSolution.Version} " +
+                            $"{(selectedSolution.IsManaged ? "[Managed]" : "")}",
+                "Solution Selected", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-            // TODO: Load entities from selected solutions into GridTables
+            // TODO: Load entities from this single solution into GridTables
+            // e.g., LoadEntitiesFromSolution(selectedSolution);
         }
-
         private void tsbClose_Click(object sender, EventArgs e) => CloseTool();
 
         private void tsbSample_Click(object sender, EventArgs e) => ExecuteMethod(GetAccounts);
@@ -216,9 +218,9 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
                     {
                         using (var picker = new SolutionPicker(solutions))
                         {
-                            if (picker.ShowDialog(this) == DialogResult.OK && picker.SelectedSolutions.Any())
+                            if (picker.ShowDialog(this) == DialogResult.OK && picker.SelectedSolution != null)
                             {
-                                OnSolutionsSelected(picker.SelectedSolutions);
+                                OnSolutionSelected(picker.SelectedSolution);
                             }
                         }
                     }));
