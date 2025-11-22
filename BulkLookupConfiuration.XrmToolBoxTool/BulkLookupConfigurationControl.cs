@@ -3,6 +3,9 @@ using BulkLookupConfiguration.XrmToolBoxTool.model;
 using McTools.Xrm.Connection;
 using Microsoft.Crm.Sdk.Messages;
 using Microsoft.Xrm.Sdk;
+using Microsoft.Xrm.Sdk.Messages;
+using Microsoft.Xrm.Sdk.Metadata;
+using Microsoft.Xrm.Sdk.Metadata.Query;
 using Microsoft.Xrm.Sdk.Query;
 using System;
 using System.Collections.Generic;
@@ -115,14 +118,103 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
 
         private void OnSolutionSelected(Solution selectedSolution)
         {
-            MessageBox.Show($"Selected solution:\n\n" +
-                            $"{selectedSolution.FriendlyName ?? selectedSolution.UniqueName} " +
-                            $"v{selectedSolution.Version} " +
-                            $"{(selectedSolution.IsManaged ? "[Managed]" : "")}",
+            var solutionName = selectedSolution.FriendlyName ?? selectedSolution.UniqueName;
+
+            MessageBox.Show($"Selected solution:\n\n{solutionName} v{selectedSolution.Version}",
                 "Solution Selected", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-            // TODO: Load entities from this single solution into GridTables
-            // e.g., LoadEntitiesFromSolution(selectedSolution);
+            WorkAsync(new WorkAsyncInfo
+            {
+                Message = $"Loading tables from solution: {solutionName}...",
+                Work = (worker, args) =>
+                {
+                    // Step 1: Get solution components (componenttype = 1 = Entity)
+                    var componentQuery = new QueryExpression("solutioncomponent")
+                    {
+                        ColumnSet = new ColumnSet("objectid"),
+                        Criteria = new FilterExpression
+                        {
+                            Conditions =
+                    {
+                        new ConditionExpression("solutionid", ConditionOperator.Equal, selectedSolution.Id),
+                        new ConditionExpression("componenttype", ConditionOperator.Equal, 1) // Entity
+                    }
+                        }
+                    };
+
+                    var components = Service.RetrieveMultiple(componentQuery);
+                    var entityIds = components.Entities
+                        .Select(c => c.GetAttributeValue<Guid>("objectid"))
+                        .Where(id => id != Guid.Empty)
+                        .ToList();
+
+                    if (!entityIds.Any())
+                    {
+                        args.Result = new List<EntityMetadata>();
+                        return;
+                    }
+
+                    // Step 2: Query EntityMetadata using entityid (Guid)
+                    var metadataRequest = new RetrieveMetadataChangesRequest
+                    {
+                        Query = new EntityQueryExpression
+                        {
+                            Criteria = new MetadataFilterExpression(LogicalOperator.And)
+                            {
+                                Conditions =
+                                {
+                                    new MetadataConditionExpression("MetadataId", MetadataConditionOperator.In, entityIds.ToArray())
+                                }
+                            },
+                            Properties = new MetadataPropertiesExpression
+                            {
+                                AllProperties = false,
+                                PropertyNames = { "LogicalName", "DisplayName", "SchemaName" }
+                            }
+                        }
+                    };
+
+                    var response = (RetrieveMetadataChangesResponse)Service.Execute(metadataRequest);
+
+                    var metadataList = response.EntityMetadata
+                        .OrderBy(m => m.DisplayName?.UserLocalizedLabel?.Label ?? m.LogicalName)
+                        .ToList();
+
+                    args.Result = metadataList;
+                },
+                PostWorkCallBack = args =>
+                {
+                    if (args.Error != null)
+                    {
+                        MessageBox.Show($"Error: {args.Error.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+
+                    var entities = args.Result as List<EntityMetadata> ?? new List<EntityMetadata>();
+
+                    GridTables.Invoke((MethodInvoker)(() =>
+                    {
+                        GridTables.Rows.Clear();
+
+                        if (!entities.Any())
+                        {
+                            GridTables.Rows.Add("No tables found", "(This solution may contain only system entities)");
+                            return;
+                        }
+
+                        foreach (var entity in entities)
+                        {
+                            var displayName = entity.DisplayName?.UserLocalizedLabel?.Label
+                                              ?? entity.SchemaName
+                                              ?? entity.LogicalName;
+
+                            GridTables.Rows.Add(displayName, entity.LogicalName);
+                        }
+
+                        GridTables.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.AllCells);
+                    }));
+                }
+            });
         }
         private void tsbClose_Click(object sender, EventArgs e) => CloseTool();
 
@@ -204,9 +296,9 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
                     .Select(entity =>
                     {
                         var sol = new Solution();
+                        sol.Id = entity.Id;
                         sol["uniquename"] = entity.GetAttributeValue<string>("uniquename");
-                        sol["friendlyname"] = entity.GetAttributeValue<string>("friendlyname")
-                                              ?? entity.GetAttributeValue<string>("uniquename");
+                        sol["friendlyname"] = entity.GetAttributeValue<string>("friendlyname") ?? entity.GetAttributeValue<string>("uniquename");
                         sol["version"] = entity.GetAttributeValue<string>("version");
                         sol["ismanaged"] = entity.GetAttributeValue<bool>("ismanaged");
                         return sol;
