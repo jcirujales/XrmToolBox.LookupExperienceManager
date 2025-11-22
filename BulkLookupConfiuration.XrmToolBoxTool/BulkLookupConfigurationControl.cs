@@ -202,8 +202,6 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
                                               ?? entity.LogicalName;
                             GridTables.Rows.Add(displayName, entity.LogicalName);
                         }
-
-                        GridTables.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.AllCells);
                     }));
                 }
             });
@@ -341,10 +339,10 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
             GridLookups = CreateStyledGrid();
             GridLookups.Columns.AddRange(new DataGridViewColumn[]
             {
-                new DataGridViewTextBoxColumn { HeaderText = "Control Name", FillWeight = 30 },
-                new DataGridViewTextBoxColumn { HeaderText = "Schema Name", FillWeight = 30 },
-                new DataGridViewTextBoxColumn { HeaderText = "Form", FillWeight = 25 },
-                new DataGridViewTextBoxColumn { HeaderText = "Target Entity", FillWeight = 15 }
+                new DataGridViewTextBoxColumn { HeaderText = "Target Entity",  FillWeight = 25 },
+                new DataGridViewTextBoxColumn { HeaderText = "Form",           FillWeight = 25 },
+                new DataGridViewTextBoxColumn { HeaderText = "Control Name",   FillWeight = 25 },
+                new DataGridViewTextBoxColumn { HeaderText = "Schema Name",    FillWeight = 25 },
             });
             panelLookups.Controls.Add(GridLookups);
             panelLookups.Controls.SetChildIndex(GridLookups, 0);
@@ -401,10 +399,12 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
                     SelectionBackColor = Color.FromArgb(0, 122, 204),
                     SelectionForeColor = Color.White,
                     Padding = new Padding(12, 0, 0, 0)
-                }
+                },
+                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill
             };
             // This line must be OUTSIDE the initializer
             grid.RowTemplate.Height = 36;
+
             return grid;
         }
 
