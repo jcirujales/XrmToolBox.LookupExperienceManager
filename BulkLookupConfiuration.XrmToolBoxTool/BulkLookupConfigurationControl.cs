@@ -1,16 +1,12 @@
-﻿using BulkLookupConfiguration.XrmToolBoxTool.forms;
+﻿using BulkLookupConfiguration.XrmToolBoxTool.Actions;
+using BulkLookupConfiguration.XrmToolBoxTool.forms;
 using BulkLookupConfiguration.XrmToolBoxTool.model;
+using BulkLookupConfiguration.XrmToolBoxTool.Services;
 using McTools.Xrm.Connection;
-using Microsoft.Crm.Sdk.Messages;
 using Microsoft.Xrm.Sdk;
-using Microsoft.Xrm.Sdk.Messages;
-using Microsoft.Xrm.Sdk.Metadata;
-using Microsoft.Xrm.Sdk.Metadata.Query;
 using Microsoft.Xrm.Sdk.Query;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
 using System.Windows.Forms;
 using XrmToolBox.Extensibility;
 using Label = System.Windows.Forms.Label;
@@ -20,6 +16,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
     public partial class BulkLookupConfigurationControl : PluginControlBase
     {
         private Settings mySettings;
+        private Label lblSelectedSolution;
         public DataGridView GridTables { get; private set; }
         public DataGridView GridLookups { get; private set; }
 
@@ -37,6 +34,38 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
             this.Dock = DockStyle.Fill;
             this.Margin = new Padding(0);
 
+            var statusPanel = new Panel
+            {
+                Dock = DockStyle.Top,
+                Height = 40,
+                BackColor = Color.FromArgb(30, 34, 42),
+                Padding = new Padding(12, 0, 12, 0)
+            };
+
+            var lblTitle = new Label
+            {
+                Text = "Lookup Experience Manager",
+                ForeColor = Color.White,
+                Font = new Font("Segoe UI", 12F, FontStyle.Bold),
+                AutoSize = true,
+                Dock = DockStyle.Left,
+                Padding = new Padding(0, 8, 0, 0)
+            };
+
+            lblSelectedSolution = new Label
+            {
+                Text = "No solution selected",
+                ForeColor = Color.FromArgb(180, 200, 255),
+                Font = new Font("Segoe UI", 10F),
+                AutoSize = true,
+                Dock = DockStyle.Right,
+                Padding = new Padding(0, 10, 20, 0)
+            };
+
+            statusPanel.Controls.Add(lblTitle);
+            statusPanel.Controls.Add(lblSelectedSolution);
+
+            // Toolbar
             var toolbar = new ToolStrip
             {
                 Dock = DockStyle.Top,
@@ -48,7 +77,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
 
             var btnClose = new ToolStripButton("Close Tool")
             {
-                // Image = Properties.Resources.Close_16x16,
+                // Image = Properties.Resources.Close_16x16, // TODO: Add Image
                 ImageScaling = ToolStripItemImageScaling.SizeToFit,
                 Alignment = ToolStripItemAlignment.Right
             };
@@ -56,7 +85,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
 
             var btnSolutions = new ToolStripButton("Select Solution")
             {
-                Image = Properties.Resources.solutions_32,
+                Image = Properties.Resources.Solutions_32,
                 ImageScaling = ToolStripItemImageScaling.None,
                 ToolTipText = "Select a solution to analyze"
             };
@@ -64,7 +93,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
 
             var btnSample = new ToolStripButton("Sample Query")
             {
-                // Image = Properties.Resources.Rocket_16x16,
+                // Image = Properties.Resources.Rocket_16x16, // TODO: Add Image
                 ToolTipText = "Run sample account query"
             };
             btnSample.Click += tsbSample_Click;
@@ -76,6 +105,33 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
             toolbar.Items.Add(btnClose);
 
             this.Controls.Add(toolbar);
+            this.Controls.Add(statusPanel);  // Add status bar
+        }
+
+        private void OnSolutionSelected(Solution selectedSolution)
+        {
+            var solutionName = selectedSolution.FriendlyName ?? selectedSolution.UniqueName;
+            var version = selectedSolution.Version ?? "?.?.?";
+
+            // Update status label instead of MessageBox
+            this.Invoke((MethodInvoker)(() =>
+            {
+                lblSelectedSolution.Text = $"Selected: {solutionName} v{version}";
+                lblSelectedSolution.ForeColor = Color.FromArgb(100, 255, 150); // Success green
+            }));
+
+            SolutionActions.LoadEntitiesFromSolution(this, selectedSolution, entities =>
+            {
+                GridTables.Invoke((MethodInvoker)(() =>
+                {
+                    GridTables.Rows.Clear();
+                    foreach (var entity in entities)
+                    {
+                        var name = entity.DisplayName?.UserLocalizedLabel?.Label ?? entity.LogicalName;
+                        GridTables.Rows.Add(name, entity.LogicalName);
+                    }
+                }));
+            });
         }
 
         private class CustomProfessionalColors : ProfessionalColorTable
@@ -90,7 +146,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
         private void BulkLookupConfigurationControl_Load(object sender, EventArgs e)
         {
             LoadSettings();
-            ExecuteMethod(WhoAmI);
+            ExecuteMethod(() => DataverseService.WhoAmI(Service));
         }
 
         private void LoadSettings()
@@ -106,105 +162,6 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
             {
                 LogInfo("Settings loaded successfully");
             }
-        }
-
-        private void WhoAmI()
-        {
-            Service.Execute(new WhoAmIRequest());
-        }
-
-        private void OnSolutionSelected(Solution selectedSolution)
-        {
-            var solutionName = selectedSolution.FriendlyName ?? selectedSolution.UniqueName;
-
-            MessageBox.Show($"Selected solution:\n\n{solutionName} v{selectedSolution.Version}",
-                "Solution Selected", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-            WorkAsync(new WorkAsyncInfo
-            {
-                Message = $"Loading tables from solution: {solutionName}...",
-                Work = (worker, args) =>
-                {
-                    // Get solution components (Entity = 1)
-                    var componentQuery = new QueryExpression("solutioncomponent")
-                    {
-                        ColumnSet = new ColumnSet("objectid"),
-                        Criteria = new FilterExpression
-                        {
-                            Conditions =
-                            {
-                                new ConditionExpression("solutionid", ConditionOperator.Equal, selectedSolution.Id),
-                                new ConditionExpression("componenttype", ConditionOperator.Equal, 1)
-                            }
-                        }
-                    };
-
-                    var components = Service.RetrieveMultiple(componentQuery);
-                    var metadataIds = components.Entities
-                        .Select(c => c.GetAttributeValue<Guid>("objectid"))
-                        .Where(id => id != Guid.Empty)
-                        .ToList();
-
-                    if (!metadataIds.Any())
-                    {
-                        args.Result = new List<EntityMetadata>();
-                        return;
-                    }
-
-                    // Retrieve EntityMetadata using MetadataId
-                    var request = new RetrieveMetadataChangesRequest
-                    {
-                        Query = new EntityQueryExpression
-                        {
-                            Criteria = new MetadataFilterExpression(LogicalOperator.And)
-                            {
-                                Conditions =
-                                {
-                                    new MetadataConditionExpression("MetadataId", MetadataConditionOperator.In, metadataIds.ToArray())
-                                }
-                            },
-                            Properties = new MetadataPropertiesExpression
-                            {
-                                PropertyNames = { "LogicalName", "DisplayName", "SchemaName" }
-                            }
-                        }
-                    };
-
-                    var response = (RetrieveMetadataChangesResponse)Service.Execute(request);
-                    args.Result = response.EntityMetadata
-                        .OrderBy(m => m.DisplayName?.UserLocalizedLabel?.Label ?? m.LogicalName)
-                        .ToList();
-                },
-                PostWorkCallBack = args =>
-                {
-                    if (args.Error != null)
-                    {
-                        MessageBox.Show($"Error: {args.Error.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        return;
-                    }
-
-                    var entities = args.Result as List<EntityMetadata> ?? new List<EntityMetadata>();
-
-                    GridTables.Invoke((MethodInvoker)(() =>
-                    {
-                        GridTables.Rows.Clear();
-
-                        if (!entities.Any())
-                        {
-                            GridTables.Rows.Add("No custom tables found", "(in this solution)");
-                            return;
-                        }
-
-                        foreach (var entity in entities)
-                        {
-                            var displayName = entity.DisplayName?.UserLocalizedLabel?.Label
-                                              ?? entity.SchemaName
-                                              ?? entity.LogicalName;
-                            GridTables.Rows.Add(displayName, entity.LogicalName);
-                        }
-                    }));
-                }
-            });
         }
 
         private void tsbSample_Click(object sender, EventArgs e) => ExecuteMethod(GetAccounts);
@@ -254,55 +211,23 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
 
         private void tsb_opensolutions_Click(object sender, EventArgs e)
         {
-            WorkAsync(new WorkAsyncInfo
+            SolutionActions.LoadSolutions(this, solutions =>
             {
-                Message = "Loading solutions...",
-                Work = (worker, args) =>
+                this.BeginInvoke((MethodInvoker)(() =>
                 {
-                    var query = new QueryExpression("solution")
+                    var picker = new SolutionPicker(solutions);
+                    try
                     {
-                        ColumnSet = new ColumnSet("friendlyname", "uniquename", "ismanaged", "version", "solutionid"),
-                        Criteria = new FilterExpression
+                        if (picker.ShowDialog(this) == DialogResult.OK && picker.SelectedSolution != null)
                         {
-                            Conditions = { new ConditionExpression("isvisible", ConditionOperator.Equal, true) }
-                        },
-                        Orders = { new OrderExpression("friendlyname", OrderType.Ascending) }
-                    };
-                    args.Result = Service.RetrieveMultiple(query);
-                },
-                PostWorkCallBack = args =>
-                {
-                    if (args.Error != null)
-                    {
-                        MessageBox.Show(args.Error.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        return;
-                    }
-
-                    var solutions = ((EntityCollection)args.Result).Entities
-                    .Select(entity =>
-                    {
-                        var sol = new Solution();
-                        sol.Id = entity.Id;
-                        sol["uniquename"] = entity.GetAttributeValue<string>("uniquename");
-                        sol["friendlyname"] = entity.GetAttributeValue<string>("friendlyname") ?? entity.GetAttributeValue<string>("uniquename");
-                        sol["version"] = entity.GetAttributeValue<string>("version");
-                        sol["ismanaged"] = entity.GetAttributeValue<bool>("ismanaged");
-                        return sol;
-                    })
-                        .OrderBy(s => s.FriendlyName)
-                        .ToList();
-
-                    this.BeginInvoke((MethodInvoker)(() =>
-                    {
-                        using (var picker = new SolutionPicker(solutions))
-                        {
-                            if (picker.ShowDialog(this) == DialogResult.OK && picker.SelectedSolution != null)
-                            {
-                                OnSolutionSelected(picker.SelectedSolution);
-                            }
+                            OnSolutionSelected(picker.SelectedSolution);
                         }
-                    }));
-                }
+                    }
+                    finally
+                    {
+                        picker.Dispose();   // TODO: Research
+                    }
+                }));
             });
         }
 

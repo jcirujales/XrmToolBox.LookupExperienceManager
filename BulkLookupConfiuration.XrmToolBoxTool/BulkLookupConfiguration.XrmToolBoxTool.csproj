@@ -236,10 +236,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="forms\SolutionPicker.cs">
+    <Compile Include="Actions\SolutionActions.cs" />
+    <Compile Include="Forms\SolutionPicker.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="model\Solution.cs" />
+    <Compile Include="Model\Solution.cs" />
     <Compile Include="BulkLookupConfigurationPlugin.cs" />
     <Compile Include="BulkLookupConfigurationControl.cs">
       <SubType>UserControl</SubType>
@@ -250,6 +251,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Services\DataverseService.cs" />
     <Compile Include="Settings.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -267,7 +269,7 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
-    <Content Include="images\solutions_32.png" />
+    <Content Include="Images\Solutions_32.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
