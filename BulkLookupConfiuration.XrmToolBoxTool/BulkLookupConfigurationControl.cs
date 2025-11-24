@@ -249,7 +249,11 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
                 mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33F));
 
             // LEFT: Tables
-            var panelTables = CreateModernPanel("Tables", "Select one or more tables to analyze");
+            var panelTables = CreateModernPanel(
+                "Target Entity",
+                "Choose the entity you want to configure lookups for.\n" +
+                "Example: Selecting \"Account\" shows every lookup that points to Account across all forms."
+            );
             GridTables = CreateStyledGrid();
             GridTables.Columns.AddRange(new DataGridViewColumn[]
             {
@@ -340,7 +344,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
             var header = new Panel
             {
                 Dock = DockStyle.Top,
-                Height = 64,
+                Height = 70,
                 BackColor = Color.FromArgb(0, 122, 204)
             };
 
