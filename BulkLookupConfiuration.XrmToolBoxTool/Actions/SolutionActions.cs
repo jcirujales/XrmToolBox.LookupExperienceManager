@@ -1,8 +1,6 @@
 ﻿using BulkLookupConfiguration.XrmToolBoxTool.model;
-using Microsoft.Xrm.Sdk.Messages;
+using BulkLookupConfiguration.XrmToolBoxTool.Services;
 using Microsoft.Xrm.Sdk.Metadata;
-using Microsoft.Xrm.Sdk.Metadata.Query;
-using Microsoft.Xrm.Sdk.Query;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,21 +23,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool.Actions
                 Message = $"Loading tables from solution: {solutionName}...",
                 Work = (worker, args) =>
                 {
-                    // Step 1: Get solution components
-                    var componentQuery = new QueryExpression("solutioncomponent")
-                    {
-                        ColumnSet = new ColumnSet("objectid"),
-                        Criteria = new FilterExpression
-                        {
-                            Conditions =
-                            {
-                                new ConditionExpression("solutionid", ConditionOperator.Equal, selectedSolution.Id),
-                                new ConditionExpression("componenttype", ConditionOperator.Equal, 1)
-                            }
-                        }
-                    };
-
-                    var components = control.Service.RetrieveMultiple(componentQuery);
+                    var components = DataverseService.GetSolutionCompoonents(selectedSolution.Id, control.Service);
                     var metadataIds = components.Entities
                         .Select(c => c.GetAttributeValue<Guid>("objectid"))
                         .Where(id => id != Guid.Empty)
@@ -50,28 +34,9 @@ namespace BulkLookupConfiguration.XrmToolBoxTool.Actions
                         args.Result = new List<EntityMetadata>();
                         return;
                     }
-
-                    // Step 2: Get metadata
-                    var request = new RetrieveMetadataChangesRequest
-                    {
-                        Query = new EntityQueryExpression
-                        {
-                            Criteria = new MetadataFilterExpression(LogicalOperator.And)
-                            {
-                                Conditions =
-                                {
-                                    new MetadataConditionExpression("MetadataId", MetadataConditionOperator.In, metadataIds.ToArray())
-                                }
-                            },
-                            Properties = new MetadataPropertiesExpression
-                            {
-                                PropertyNames = { "LogicalName", "DisplayName", "SchemaName" }
-                            }
-                        }
-                    };
-
-                    var response = (RetrieveMetadataChangesResponse)control.Service.Execute(request);
-                    args.Result = response.EntityMetadata
+                    var tables = DataverseService.GetTables(metadataIds.ToArray(), control.Service);
+                    
+                    args.Result = tables
                         .OrderBy(m => m.DisplayName?.UserLocalizedLabel?.Label ?? m.LogicalName)
                         .ToList();
                 },
@@ -99,19 +64,9 @@ namespace BulkLookupConfiguration.XrmToolBoxTool.Actions
                 Message = "Loading solutions...",
                 Work = (worker, args) =>
                 {
-                    var query = new QueryExpression("solution")
-                    {
-                        ColumnSet = new ColumnSet("friendlyname", "uniquename", "ismanaged", "version", "solutionid"),
-                        Criteria = new FilterExpression
-                        {
-                            Conditions = { new ConditionExpression("isvisible", ConditionOperator.Equal, true) }
-                        },
-                        Orders = { new OrderExpression("friendlyname", OrderType.Ascending) }
-                    };
+                    var solutions = DataverseService.GetSolutions(control.Service);
 
-                    var result = control.Service.RetrieveMultiple(query);
-
-                    args.Result = result.Entities
+                    args.Result = solutions.Entities
                         .Select(e =>
                         {
                             var sol = new Solution();

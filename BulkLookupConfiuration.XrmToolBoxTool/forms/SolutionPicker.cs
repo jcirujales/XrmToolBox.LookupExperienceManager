@@ -1,8 +1,6 @@
 ﻿using BulkLookupConfiguration.XrmToolBoxTool.model;
-using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
 using System.Windows.Forms;
 
 namespace BulkLookupConfiguration.XrmToolBoxTool.forms
