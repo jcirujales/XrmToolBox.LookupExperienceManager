@@ -4,9 +4,14 @@ using BulkLookupConfiguration.XrmToolBoxTool.model;
 using BulkLookupConfiguration.XrmToolBoxTool.Services;
 using McTools.Xrm.Connection;
 using Microsoft.Xrm.Sdk;
+using Microsoft.Xrm.Sdk.Messages;
+using Microsoft.Xrm.Sdk.Metadata;
+using Microsoft.Xrm.Sdk.Metadata.Query;
 using Microsoft.Xrm.Sdk.Query;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 using XrmToolBox.Extensibility;
 using Label = System.Windows.Forms.Label;
@@ -133,6 +138,126 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
                 }));
             });
         }
+        private void GridTables_SelectionChanged(object sender, EventArgs e)
+        {
+            if (GridTables.SelectedRows.Count == 0) return;
+            var logicalName = GridTables.SelectedRows[0].Cells[1].Value?.ToString();
+            if (string.IsNullOrEmpty(logicalName)) return;
+
+            LoadReverseLookupsUsingOneToMany(logicalName);
+        }
+        private void LoadReverseLookupsUsingOneToMany(string targetEntityLogicalName)
+        {
+            WorkAsync(new WorkAsyncInfo
+            {
+                Message = $"Finding lookups for {targetEntityLogicalName}...",
+                Work = (worker, args) =>
+                {
+                    var request = new RetrieveMetadataChangesRequest
+                    {
+                        Query = new EntityQueryExpression
+                        {
+                            Criteria = new MetadataFilterExpression(LogicalOperator.And)
+                            {
+                                Conditions =
+                                {
+                                    new MetadataConditionExpression("LogicalName", MetadataConditionOperator.Equals, targetEntityLogicalName)
+                                }
+                            },
+                            RelationshipQuery = new RelationshipQueryExpression
+                            {
+                                Criteria = new MetadataFilterExpression(LogicalOperator.And)
+                                {
+                                    Conditions =
+                                    {
+                                        new MetadataConditionExpression("RelationshipType", MetadataConditionOperator.Equals, RelationshipType.OneToManyRelationship),
+                                        new MetadataConditionExpression("IsValidForAdvancedFind", MetadataConditionOperator.Equals, true),
+                                        new MetadataConditionExpression("IsCustomizable", MetadataConditionOperator.Equals, true),
+                                    }
+                                }
+                            }
+                        }
+                    };
+
+                    var response = (RetrieveMetadataChangesResponse)Service.Execute(request);
+                    var relationships = response.EntityMetadata[0].OneToManyRelationships
+                        .Where(r =>
+                            r.IsCustomizable?.Value == true &&
+                            r.IsCustomizable?.CanBeChanged == true &&
+                            r.IsValidForAdvancedFind == true &&
+                            r.ReferencingAttribute != "createdby" &&
+                            r.ReferencingAttribute != "createdonbehalfby" &&
+                            r.ReferencingAttribute != "modifiedby" &&
+                            r.ReferencingAttribute != "modifiedonbehalfby" &&
+                            r.ReferencingAttribute != "processinguser" &&
+                            r.ReferencingAttribute != "sideloadedpluginownerid" &&
+                            r.ReferencingAttribute != "partyid" &&
+                            r.ReferencingAttribute != "owninguser"
+                        )
+                        .ToList();
+
+                    var results = new List<LookupInfo>();
+
+                    foreach (var rel in relationships)
+                    {
+                        var sourceEntity = rel.ReferencingEntity;
+                        var lookupField = rel.ReferencingAttribute;
+
+                        var attrRequest = new RetrieveAttributeRequest
+                        {
+                            EntityLogicalName = sourceEntity,
+                            LogicalName = lookupField,
+                            RetrieveAsIfPublished = true
+                        };
+
+                        var attrResponse = (RetrieveAttributeResponse)Service.Execute(attrRequest);
+                        var lookupAttr = (LookupAttributeMetadata)attrResponse.AttributeMetadata;
+
+                        var label = lookupAttr.DisplayName?.UserLocalizedLabel?.Label
+                                    ?? lookupField;
+
+                        results.Add(new LookupInfo
+                        {
+                            SourceEntity = sourceEntity,
+                            Label = "TODO: Form Label",
+                            SchemaName = lookupField
+                        });
+                    }
+
+                    args.Result = results
+                        .OrderBy(r => r.SourceEntity)
+                        .ThenBy(r => r.Label)
+                        .ToList();
+                },
+                PostWorkCallBack = args =>
+                {
+                    if (args.Error != null)
+                    {
+                        MessageBox.Show(args.Error.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+
+                    var lookups = (List<LookupInfo>)args.Result;
+
+                    GridLookups.Invoke((MethodInvoker)(() =>
+                    {
+                        GridLookups.Rows.Clear();
+                        foreach (var l in lookups)
+                        {
+                            GridLookups.Rows.Add(l.SourceEntity, l.Form, l.Label, l.SchemaName);
+                        }
+                    }));
+                }
+            });
+        }
+        // Add this class anywhere in your project (e.g., Models/LookupInfo.cs)
+        public class LookupInfo
+        {
+            public string SourceEntity { get; set; }
+            public string Form { get; set; }
+            public string Label { get; set; }
+            public string SchemaName { get; set; }
+        }
 
         private class CustomProfessionalColors : ProfessionalColorTable
         {
@@ -255,6 +380,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
                 "Example: Selecting \"Account\" shows every lookup that points to Account across all forms."
             );
             GridTables = CreateStyledGrid();
+            GridTables.SelectionChanged += GridTables_SelectionChanged;
             GridTables.Columns.AddRange(new DataGridViewColumn[]
             {
                 new DataGridViewTextBoxColumn { HeaderText = "Display Name", DataPropertyName = "DisplayName", FillWeight = 55 },
@@ -268,9 +394,9 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
             GridLookups = CreateStyledGrid();
             GridLookups.Columns.AddRange(new DataGridViewColumn[]
             {
-                new DataGridViewTextBoxColumn { HeaderText = "Target Entity",  FillWeight = 25 },
+                new DataGridViewTextBoxColumn { HeaderText = "Source Entity",  FillWeight = 25 },
                 new DataGridViewTextBoxColumn { HeaderText = "Form",           FillWeight = 25 },
-                new DataGridViewTextBoxColumn { HeaderText = "Control Name",   FillWeight = 25 },
+                new DataGridViewTextBoxColumn { HeaderText = "Label",          FillWeight = 25 },
                 new DataGridViewTextBoxColumn { HeaderText = "Schema Name",    FillWeight = 25 },
             });
             panelLookups.Controls.Add(GridLookups);
