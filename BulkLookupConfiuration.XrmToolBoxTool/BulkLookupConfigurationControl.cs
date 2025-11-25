@@ -153,34 +153,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
                 Message = $"Finding lookups for {targetEntityLogicalName}...",
                 Work = (worker, args) =>
                 {
-                    var request = new RetrieveMetadataChangesRequest
-                    {
-                        Query = new EntityQueryExpression
-                        {
-                            Criteria = new MetadataFilterExpression(LogicalOperator.And)
-                            {
-                                Conditions =
-                                {
-                                    new MetadataConditionExpression("LogicalName", MetadataConditionOperator.Equals, targetEntityLogicalName)
-                                }
-                            },
-                            RelationshipQuery = new RelationshipQueryExpression
-                            {
-                                Criteria = new MetadataFilterExpression(LogicalOperator.And)
-                                {
-                                    Conditions =
-                                    {
-                                        new MetadataConditionExpression("RelationshipType", MetadataConditionOperator.Equals, RelationshipType.OneToManyRelationship),
-                                        new MetadataConditionExpression("IsValidForAdvancedFind", MetadataConditionOperator.Equals, true),
-                                        new MetadataConditionExpression("IsCustomizable", MetadataConditionOperator.Equals, true),
-                                    }
-                                }
-                            }
-                        }
-                    };
-
-                    var response = (RetrieveMetadataChangesResponse)Service.Execute(request);
-                    var relationships = response.EntityMetadata[0].OneToManyRelationships
+                    var relationships = DataverseService.GetOneToManyRelationships(targetEntityLogicalName, Service)?.OneToManyRelationships
                         .Where(r =>
                             r.IsCustomizable?.Value == true &&
                             r.IsCustomizable?.CanBeChanged == true &&
@@ -192,38 +165,12 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
                             r.ReferencingAttribute != "processinguser" &&
                             r.ReferencingAttribute != "sideloadedpluginownerid" &&
                             r.ReferencingAttribute != "partyid" &&
-                            r.ReferencingAttribute != "owninguser"
+                            r.ReferencingAttribute != "owninguser" &&
+                            r.ReferencingAttribute != "owningteam"
                         )
                         .ToList();
 
-                    var results = new List<LookupInfo>();
-
-                    foreach (var rel in relationships)
-                    {
-                        var sourceEntity = rel.ReferencingEntity;
-                        var lookupField = rel.ReferencingAttribute;
-
-                        var attrRequest = new RetrieveAttributeRequest
-                        {
-                            EntityLogicalName = sourceEntity,
-                            LogicalName = lookupField,
-                            RetrieveAsIfPublished = true
-                        };
-
-                        var attrResponse = (RetrieveAttributeResponse)Service.Execute(attrRequest);
-                        var lookupAttr = (LookupAttributeMetadata)attrResponse.AttributeMetadata;
-
-                        var label = lookupAttr.DisplayName?.UserLocalizedLabel?.Label
-                                    ?? lookupField;
-
-                        results.Add(new LookupInfo
-                        {
-                            SourceEntity = sourceEntity,
-                            Label = "TODO: Form Label",
-                            SchemaName = lookupField
-                        });
-                    }
-
+                    var results = DataverseService.GetLookupAttributeInfo(relationships, Service);
                     args.Result = results
                         .OrderBy(r => r.SourceEntity)
                         .ThenBy(r => r.Label)
