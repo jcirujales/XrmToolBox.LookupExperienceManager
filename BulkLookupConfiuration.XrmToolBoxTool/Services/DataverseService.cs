@@ -164,13 +164,18 @@ namespace BulkLookupConfiguration.XrmToolBoxTool.Services
 
                 foreach (var form in forms.Entities)
                 {
-                    var formLabel = GetLookupLabelFromFormXml(form.GetAttributeValue<string>("formxml"), lookupField);
+                    var formConfigSettings = GetLookupConfigurationSettings(form.GetAttributeValue<string>("formxml"), lookupField);
+                    
                     results.Add(new LookupInfo
                     {
                         Form = form.GetAttributeValue<string>("name"),
                         SourceEntity = sourceEntity,
-                        Label = formLabel,
-                        SchemaName = lookupField
+                        Label = formConfigSettings.Label,
+                        SchemaName = lookupField,
+                        DisableMru = formConfigSettings.DisableMru,
+                        IsInlineNewEnabled = formConfigSettings.IsInlineNewEnabled,
+                        UseMainFormDialogForCreate = formConfigSettings.UseMainFormDialogForCreate,
+                        UseMainFormDialogForEdit = formConfigSettings.UseMainFormDialogForEdit
                     });
                 }
             }
@@ -178,35 +183,51 @@ namespace BulkLookupConfiguration.XrmToolBoxTool.Services
             return results;
         }
 
-        private static string GetLookupLabelFromFormXml(string formXml, string schemaName)
+        private static bool GetBool(XElement parameters, string name, bool defaultValue = false)
         {
-            try
+            var element = parameters.Element(name);
+            if (element == null) return defaultValue;
+            return element.Value == "true";
+        }
+
+        private static LookupInfo GetLookupConfigurationSettings(string formXml, string schemaName)
+        {
+            var result = new LookupInfo
             {
-                var doc = XDocument.Parse(formXml);
+                Label = schemaName,
+                IsInlineNewEnabled = true,
+                DisableMru = false,
+                UseMainFormDialogForCreate = false,
+                UseMainFormDialogForEdit = false
+            };
 
-                var control = doc.Descendants("control")
-                    .FirstOrDefault(c => c.Attribute("datafieldname")?.Value == schemaName);
+            var doc = XDocument.Parse(formXml);
+            var control = doc.Descendants("control")
+                .FirstOrDefault(c => c.Attribute("datafieldname")?.Value == schemaName);
 
-                if (control == null) return schemaName;
+            if (control == null) return result;
 
-                // PERFECT: Direct child only
-                var labelsElement = control.Parent?.Elements("labels").FirstOrDefault();
+            // Label
+            var label = control.Parent?.Elements("labels")
+                .FirstOrDefault()?
+                .Elements("label")
+                .FirstOrDefault(l => l.Attribute("languagecode")?.Value == "1033")
+                ?.Attribute("description")?.Value;
 
-                if (labelsElement != null)
-                {
-                    var label = labelsElement.Elements("label")
-                        .FirstOrDefault(l => l.Attribute("languagecode")?.Value == "1033")
-                        ?.Attribute("description")?.Value;
+            if (!string.IsNullOrEmpty(label))
+                result.Label = label;
 
-                    return label ?? schemaName;
-                }
-
-                return schemaName;
-            }
-            catch
+            // Parameters — direct children
+            var parameters = control.Elements("parameters").FirstOrDefault();
+            if (parameters != null)
             {
-                return schemaName;
+                result.IsInlineNewEnabled = GetBool(parameters, "IsInlineNewEnabled", true);
+                result.DisableMru = GetBool(parameters, "DisableMru", false);
+                result.UseMainFormDialogForCreate = GetBool(parameters, "useMainFormDialogForCreate", false);
+                result.UseMainFormDialogForEdit = GetBool(parameters, "useMainFormDialogForEdit", false);
             }
+
+            return result;
         }
     }
 }

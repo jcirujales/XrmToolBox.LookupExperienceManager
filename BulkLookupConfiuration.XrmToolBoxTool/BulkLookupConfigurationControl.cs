@@ -191,7 +191,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
                         GridLookups.Rows.Clear();
                         foreach (var l in lookups)
                         {
-                            GridLookups.Rows.Add(l.SourceEntity, l.Form, l.Label, l.SchemaName);
+                            GridLookups.Rows.Add(l.SourceEntity, l.Form, l.Label, l.SchemaName, l.DisableMru, l.IsInlineNewEnabled, l.UseMainFormDialogForCreate, l.UseMainFormDialogForEdit);
                         }
                     }));
                 }
@@ -204,6 +204,10 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
             public string Form { get; set; }
             public string Label { get; set; }
             public string SchemaName { get; set; }
+            public bool IsInlineNewEnabled { get; set; }
+            public bool DisableMru { get; set; }
+            public bool UseMainFormDialogForEdit { get; set; }
+            public bool UseMainFormDialogForCreate { get; set; }
         }
 
         private class CustomProfessionalColors : ProfessionalColorTable
@@ -345,6 +349,10 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
                 new DataGridViewTextBoxColumn { HeaderText = "Form",           FillWeight = 25 },
                 new DataGridViewTextBoxColumn { HeaderText = "Label",          FillWeight = 25 },
                 new DataGridViewTextBoxColumn { HeaderText = "Schema Name",    FillWeight = 25 },
+                new DataGridViewTextBoxColumn { HeaderText = "Disable Most Recently Used",    FillWeight = 25 },
+                new DataGridViewTextBoxColumn { HeaderText = "Is Inline New Enabled",    FillWeight = 25 },
+                new DataGridViewTextBoxColumn { HeaderText = "Use Main Form Dialog for Create",    FillWeight = 25 },
+                new DataGridViewTextBoxColumn { HeaderText = "Use Main Form Dialog for Edit",    FillWeight = 25 },
             });
             panelLookups.Controls.Add(GridLookups);
             panelLookups.Controls.SetChildIndex(GridLookups, 0);
