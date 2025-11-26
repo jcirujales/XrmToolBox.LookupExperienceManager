@@ -321,8 +321,9 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
                 BackColor = Color.FromArgb(40, 44, 52)
             };
 
-            for (int i = 0; i < 3; i++)
-                mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33F));
+            mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
+            mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+            mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
 
             // LEFT: Tables
             var panelTables = CreateModernPanel(
