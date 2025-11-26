@@ -325,7 +325,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
             // LEFT: Tables
             var panelTables = CreateModernPanel(
                 "Target Entity",
-                "Choose the entity you want to configure lookups for.\n" +
+                "Select a target entity to see all lookup controls pointing to it.\n" +
                 "Example: Selecting \"Account\" shows every lookup that points to Account across all forms."
             );
             GridTables = CreateStyledGrid();
