@@ -197,14 +197,11 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
                     }
 
                     var lookups = (List<LookupInfo>)args.Result;
-
                     GridLookups.Invoke((MethodInvoker)(() =>
                     {
-                        GridLookups.Rows.Clear();
-                        foreach (var l in lookups)
-                        {
-                            GridLookups.Rows.Add(l.SourceEntity, l.Form, l.Label, l.SchemaName, l.DisableMru, l.IsInlineNewEnabled, l.UseMainFormDialogForCreate, l.UseMainFormDialogForEdit);
-                        }
+                        GridLookups.DataSource = null;
+                        GridLookups.DataSource = lookups;  // ← Magic: binds by name
+                        GridLookups.ClearSelection();
 
                         UpdateConfigPanel();
                     }));
@@ -374,17 +371,61 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
 
             // MIDDLE: Lookup Controls
             var panelLookups = CreateModernPanel("Lookup Controls", "Select lookup fields to configure");
+           
             GridLookups = CreateStyledGrid();
+            GridLookups.MultiSelect = true;
+            GridLookups.AutoGenerateColumns = false; // ← CRITICAL
+
             GridLookups.Columns.AddRange(new DataGridViewColumn[]
             {
-                new DataGridViewTextBoxColumn { HeaderText = "Source Entity", FillWeight = 25 },
-                new DataGridViewTextBoxColumn { HeaderText = "Form", FillWeight = 25 },
-                new DataGridViewTextBoxColumn { HeaderText = "Label", FillWeight = 25 },
-                new DataGridViewTextBoxColumn { HeaderText = "Schema Name", FillWeight = 25 },
-                new DataGridViewTextBoxColumn { HeaderText = "Disable MRU", FillWeight = 25 },
-                new DataGridViewTextBoxColumn { HeaderText = "Is + New Enabled", FillWeight = 25 },
-                new DataGridViewTextBoxColumn { HeaderText = "Main Form (Create)", FillWeight = 25 },
-                new DataGridViewTextBoxColumn { HeaderText = "Main Form (Edit)", FillWeight = 25 },
+                new DataGridViewTextBoxColumn
+                {
+                    HeaderText = "Source Entity",
+                    DataPropertyName = "SourceEntity",   // ← Named!
+                    FillWeight = 25
+                },
+                new DataGridViewTextBoxColumn
+                {
+                    HeaderText = "Form",
+                    DataPropertyName = "Form",
+                    FillWeight = 25
+                },
+                new DataGridViewTextBoxColumn
+                {
+                    HeaderText = "Label",
+                    DataPropertyName = "Label",    // ← Combined label
+                    FillWeight = 25
+                },
+                new DataGridViewTextBoxColumn
+                {
+                    HeaderText = "Schema Name",
+                    DataPropertyName = "SchemaName",
+                    FillWeight = 25
+                },
+                new DataGridViewCheckBoxColumn
+                {
+                    HeaderText = "Disable MRU",
+                    DataPropertyName = "DisableMru",
+                    FillWeight = 20
+                },
+                new DataGridViewCheckBoxColumn
+                {
+                    HeaderText = "+ New",
+                    DataPropertyName = "IsInlineNewEnabled",
+                    FillWeight = 20
+                },
+                new DataGridViewCheckBoxColumn
+                {
+                    HeaderText = "Main Form (Create)",
+                    DataPropertyName = "UseMainFormDialogForCreate",
+                    FillWeight = 20
+                },
+                new DataGridViewCheckBoxColumn
+                {
+                    HeaderText = "Main Form (Edit)",
+                    DataPropertyName = "UseMainFormDialogForEdit",
+                    FillWeight = 20
+                },
             });
             panelLookups.Controls.Add(GridLookups);
             panelLookups.Controls.SetChildIndex(GridLookups, 0);
@@ -525,7 +566,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
                 ReadOnly = true,
                 RowHeadersVisible = false,
                 SelectionMode = DataGridViewSelectionMode.FullRowSelect,
-                MultiSelect = true,
+                MultiSelect = false,
                 ColumnHeadersHeight = 40,
                 EnableHeadersVisualStyles = false,
                 ColumnHeadersDefaultCellStyle = new DataGridViewCellStyle
