@@ -13,7 +13,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
     // To generate Base64 string for Images below, you can use https://www.base64-image.de/
     [Export(typeof(IXrmToolBoxPlugin)),
         ExportMetadata("Name", "Lookup Experience Manager"),
-        ExportMetadata("Description", "This plugin bulk updates lookup controls so that the \"New\" button and \"Most Recently Used\" configuration options can be toggled on/off."),
+        ExportMetadata("Description", "This plugin bulk updates lookup controls so that its inline \"New\" button, \"Most Recently Used\", and \"Use Main Form Dialog For (Create/Edit)\" configuration options can be toggled on/off."),
         // Please specify the base64 content of a 32x32 pixels image
         ExportMetadata("SmallImageBase64", null),
         // Please specify the base64 content of a 80x80 pixels image

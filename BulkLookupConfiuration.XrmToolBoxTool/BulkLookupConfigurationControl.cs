@@ -19,6 +19,13 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
     {
         private Settings mySettings;
         private Label lblSelectedSolution;
+        private Label lblConfigMessage;
+        private CheckBox chkDisableNew;
+        private CheckBox chkDisableMru;
+        private CheckBox chkMainFormCreate;
+        private CheckBox chkMainFormEdit;
+        private Button btnSavePublish;
+
         public DataGridView GridTables { get; private set; }
         public DataGridView GridLookups { get; private set; }
 
@@ -67,7 +74,6 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
             statusPanel.Controls.Add(lblTitle);
             statusPanel.Controls.Add(lblSelectedSolution);
 
-            // Toolbar
             var toolbar = new ToolStrip
             {
                 Dock = DockStyle.Top,
@@ -79,8 +85,6 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
 
             var btnClose = new ToolStripButton("Close Tool")
             {
-                // Image = Properties.Resources.Close_16x16, // TODO: Add Image
-                ImageScaling = ToolStripItemImageScaling.SizeToFit,
                 Alignment = ToolStripItemAlignment.Right
             };
             btnClose.Click += (s, e) => CloseTool();
@@ -95,7 +99,6 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
 
             var btnSample = new ToolStripButton("Sample Query")
             {
-                // Image = Properties.Resources.Rocket_16x16, // TODO: Add Image
                 ToolTipText = "Run sample account query"
             };
             btnSample.Click += tsbSample_Click;
@@ -107,7 +110,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
             toolbar.Items.Add(btnClose);
 
             this.Controls.Add(toolbar);
-            this.Controls.Add(statusPanel);  // Add status bar
+            this.Controls.Add(statusPanel);
         }
 
         private void OnSolutionSelected(Solution selectedSolution)
@@ -115,34 +118,46 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
             var solutionName = selectedSolution.FriendlyName ?? selectedSolution.UniqueName;
             var version = selectedSolution.Version ?? "?.?.?";
 
-            // Update status label instead of MessageBox
             this.Invoke((MethodInvoker)(() =>
             {
                 lblSelectedSolution.Text = $"Selected: {solutionName} v{version}";
-                lblSelectedSolution.ForeColor = Color.FromArgb(100, 255, 150); // Success green
+                lblSelectedSolution.ForeColor = Color.FromArgb(100, 255, 150);
             }));
 
             SolutionActions.LoadEntitiesFromSolution(this, selectedSolution, entities =>
             {
                 GridTables.Invoke((MethodInvoker)(() =>
                 {
+                    GridTables.ClearSelection();
                     GridTables.Rows.Clear();
+
                     foreach (var entity in entities)
                     {
                         var name = entity.DisplayName?.UserLocalizedLabel?.Label ?? entity.LogicalName;
                         GridTables.Rows.Add(name, entity.LogicalName);
                     }
+
+                    GridLookups.Rows.Clear();
+                    UpdateConfigPanel();
                 }));
             });
         }
+
         private void GridTables_SelectionChanged(object sender, EventArgs e)
         {
-            if (GridTables.SelectedRows.Count == 0) return;
+            if (GridTables.SelectedRows.Count == 0)
+            {
+                GridLookups.Rows.Clear();
+                UpdateConfigPanel();
+                return;
+            }
+
             var logicalName = GridTables.SelectedRows[0].Cells[1].Value?.ToString();
             if (string.IsNullOrEmpty(logicalName)) return;
 
             LoadReverseLookupsUsingOneToMany(logicalName);
         }
+
         private void LoadReverseLookupsUsingOneToMany(string targetEntityLogicalName)
         {
             WorkAsync(new WorkAsyncInfo
@@ -190,11 +205,38 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
                         {
                             GridLookups.Rows.Add(l.SourceEntity, l.Form, l.Label, l.SchemaName, l.DisableMru, l.IsInlineNewEnabled, l.UseMainFormDialogForCreate, l.UseMainFormDialogForEdit);
                         }
+
+                        UpdateConfigPanel();
                     }));
                 }
             });
         }
-        // Add this class anywhere in your project (e.g., Models/LookupInfo.cs)
+
+        private void UpdateConfigPanel()
+        {
+            var selected = GridLookups.Rows.Cast<DataGridViewRow>().Where(r => r.Selected).ToList();
+
+            if (selected.Count == 0)
+            {
+                lblConfigMessage.Text = "Selected: 0 lookup controls";
+                chkDisableNew.Enabled = false;
+                chkDisableMru.Enabled = false;
+                chkMainFormCreate.Enabled = false;
+                chkMainFormEdit.Enabled = false;
+                btnSavePublish.Visible = false;
+                return;
+            }
+
+            lblConfigMessage.Text = $"Selected: {selected.Count} lookup control{(selected.Count > 1 ? "s" : "")}";
+
+            chkDisableNew.Enabled = true;
+            chkDisableMru.Enabled = true;
+            chkMainFormCreate.Enabled = true;
+            chkMainFormEdit.Enabled = true;
+            btnSavePublish.Visible = true;
+            btnSavePublish.Text = $"Save and Publish ({selected.Count})";
+        }
+
         public class LookupInfo
         {
             public string SourceEntity { get; set; }
@@ -225,7 +267,6 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
         private void LoadSettings()
         {
             ShowInfoNotification("Welcome to Lookup Experience Manager", new Uri("https://github.com/MscrmTools/XrmToolBox"));
-
             if (!SettingsManager.Instance.TryLoad(GetType(), out mySettings))
             {
                 mySettings = new Settings();
@@ -298,15 +339,12 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
                     }
                     finally
                     {
-                        picker.Dispose();   // TODO: Research
+                        picker.Dispose();
                     }
                 }));
             });
         }
 
-        // ===================================================================
-        // FINAL MODERN UI — No overlap, no hacks, perfect
-        // ===================================================================
         private void SetupModernLayout()
         {
             var mainLayout = new TableLayoutPanel
@@ -322,18 +360,14 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
             mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
             mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
 
-            // LEFT: Tables
-            var panelTables = CreateModernPanel(
-                "Target Entity",
-                "Select a target entity to see all lookup controls pointing to it.\n" +
-                "Example: Selecting \"Account\" shows every lookup that points to Account across all forms."
-            );
+            // LEFT: Target Entity
+            var panelTables = CreateModernPanel("Target Entity", "Select a target entity to see all lookup controls pointing to it");
             GridTables = CreateStyledGrid();
             GridTables.SelectionChanged += GridTables_SelectionChanged;
             GridTables.Columns.AddRange(new DataGridViewColumn[]
             {
-                new DataGridViewTextBoxColumn { HeaderText = "Display Name", DataPropertyName = "DisplayName", FillWeight = 55 },
-                new DataGridViewTextBoxColumn { HeaderText = "Schema Name", DataPropertyName = "LogicalName", FillWeight = 45 }
+                new DataGridViewTextBoxColumn { HeaderText = "Display Name", FillWeight = 55 },
+                new DataGridViewTextBoxColumn { HeaderText = "Schema Name", FillWeight = 45 }
             });
             panelTables.Controls.Add(GridTables);
             panelTables.Controls.SetChildIndex(GridTables, 0);
@@ -343,30 +377,132 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
             GridLookups = CreateStyledGrid();
             GridLookups.Columns.AddRange(new DataGridViewColumn[]
             {
-                new DataGridViewTextBoxColumn { HeaderText = "Source Entity",  FillWeight = 25 },
-                new DataGridViewTextBoxColumn { HeaderText = "Form",           FillWeight = 25 },
-                new DataGridViewTextBoxColumn { HeaderText = "Label",          FillWeight = 25 },
-                new DataGridViewTextBoxColumn { HeaderText = "Schema Name",    FillWeight = 25 },
-                new DataGridViewTextBoxColumn { HeaderText = "Disable Most Recently Used",    FillWeight = 25 },
-                new DataGridViewTextBoxColumn { HeaderText = "Is Inline New Enabled",    FillWeight = 25 },
-                new DataGridViewTextBoxColumn { HeaderText = "Use Main Form Dialog for Create",    FillWeight = 25 },
-                new DataGridViewTextBoxColumn { HeaderText = "Use Main Form Dialog for Edit",    FillWeight = 25 },
+                new DataGridViewTextBoxColumn { HeaderText = "Source Entity", FillWeight = 25 },
+                new DataGridViewTextBoxColumn { HeaderText = "Form", FillWeight = 25 },
+                new DataGridViewTextBoxColumn { HeaderText = "Label", FillWeight = 25 },
+                new DataGridViewTextBoxColumn { HeaderText = "Schema Name", FillWeight = 25 },
+                new DataGridViewTextBoxColumn { HeaderText = "Disable MRU", FillWeight = 25 },
+                new DataGridViewTextBoxColumn { HeaderText = "Is + New Enabled", FillWeight = 25 },
+                new DataGridViewTextBoxColumn { HeaderText = "Main Form (Create)", FillWeight = 25 },
+                new DataGridViewTextBoxColumn { HeaderText = "Main Form (Edit)", FillWeight = 25 },
             });
             panelLookups.Controls.Add(GridLookups);
             panelLookups.Controls.SetChildIndex(GridLookups, 0);
 
-            // RIGHT: Configuration
-            var panelConfig = CreateModernPanel("Configuration", "Settings will appear when lookup(s) selected");
-            var lbl = new Label
+            // RIGHT: Configuration — CLEAN & ELEGANT
+            var panelConfig = new Panel { Dock = DockStyle.Fill };
+
+            var headerConfig = new Panel
             {
-                Text = "Select one or more lookup controls\nto configure their behavior",
-                ForeColor = Color.FromArgb(180, 180, 180),
-                Font = new Font("Segoe UI", 11F),
-                Dock = DockStyle.Fill,
-                TextAlign = ContentAlignment.MiddleCenter
+                Dock = DockStyle.Top,
+                Height = 70,
+                BackColor = Color.FromArgb(0, 122, 204),
+                Padding = new Padding(16, 12, 16, 12)
             };
-            panelConfig.Controls.Add(lbl);
-            panelConfig.Controls.SetChildIndex(lbl, 0);
+
+            var lblConfigTitle = new Label
+            {
+                Text = "Configuration",
+                ForeColor = Color.White,
+                Font = new Font("Segoe UI Semibold", 13F),
+                AutoSize = true,
+                Location = new Point(0, 0)
+            };
+
+            var lblConfigSubtitle = new Label
+            {
+                Text = "Select one or more lookup controls to configure",
+                ForeColor = Color.FromArgb(220, 240, 255),
+                Font = new Font("Segoe UI", 9F),
+                AutoSize = false,
+                Dock = DockStyle.Fill,
+                Padding = new Padding(0, 28, 0, 0)
+            };
+
+            headerConfig.Controls.Add(lblConfigSubtitle);
+            headerConfig.Controls.Add(lblConfigTitle);
+            lblConfigTitle.BringToFront();
+
+            var content = new FlowLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                Padding = new Padding(24),
+                FlowDirection = FlowDirection.TopDown,
+                AutoSize = true,
+                WrapContents = false
+            };
+
+            lblConfigMessage = new Label
+            {
+                Text = "Selected: 0 lookup controls",
+                ForeColor = Color.FromArgb(180, 180, 255),
+                Font = new Font("Segoe UI", 10F, FontStyle.Bold),
+                AutoSize = true,
+                Margin = new Padding(0, 0, 0, 20)
+            };
+
+            chkDisableNew = new CheckBox
+            {
+                Text = "Disable + New button",
+                ForeColor = Color.White,
+                Font = new Font("Segoe UI", 10F),
+                AutoSize = true,
+                Enabled = false,
+                Margin = new Padding(0, 0, 0, 12)
+            };
+
+            chkDisableMru = new CheckBox
+            {
+                Text = "Hide Recently Used (MRU)",
+                ForeColor = Color.White,
+                Font = new Font("Segoe UI", 10F),
+                AutoSize = true,
+                Enabled = false,
+                Margin = new Padding(0, 0, 0, 12)
+            };
+
+            chkMainFormCreate = new CheckBox
+            {
+                Text = "Use main form dialog for Create",
+                ForeColor = Color.White,
+                Font = new Font("Segoe UI", 10F),
+                AutoSize = true,
+                Enabled = false,
+                Margin = new Padding(0, 0, 0, 12)
+            };
+
+            chkMainFormEdit = new CheckBox
+            {
+                Text = "Use main form dialog for Edit",
+                ForeColor = Color.White,
+                Font = new Font("Segoe UI", 10F),
+                AutoSize = true,
+                Enabled = false,
+                Margin = new Padding(0, 0, 0, 30)
+            };
+
+            btnSavePublish = new Button
+            {
+                Text = "Save & Publish",
+                BackColor = Color.FromArgb(0, 122, 204),
+                ForeColor = Color.White,
+                Font = new Font("Segoe UI", 10F, FontStyle.Bold),
+                FlatStyle = FlatStyle.Flat,
+                Height = 44,
+                Width = 200,
+                Visible = false
+            };
+            btnSavePublish.FlatAppearance.BorderSize = 0;
+
+            content.Controls.Add(lblConfigMessage);
+            content.Controls.Add(chkDisableNew);
+            content.Controls.Add(chkDisableMru);
+            content.Controls.Add(chkMainFormCreate);
+            content.Controls.Add(chkMainFormEdit);
+            content.Controls.Add(btnSavePublish);
+
+            panelConfig.Controls.Add(content);
+            panelConfig.Controls.Add(headerConfig); // Header on top
 
             mainLayout.Controls.Add(panelTables, 0, 0);
             mainLayout.Controls.Add(panelLookups, 1, 0);
@@ -410,9 +546,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
                 },
                 AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill
             };
-            // This line must be OUTSIDE the initializer
             grid.RowTemplate.Height = 36;
-
             return grid;
         }
 
@@ -424,7 +558,8 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
             {
                 Dock = DockStyle.Top,
                 Height = 70,
-                BackColor = Color.FromArgb(0, 122, 204)
+                BackColor = Color.FromArgb(0, 122, 204),
+                Padding = new Padding(16, 12, 16, 12)
             };
 
             var lblTitle = new Label
@@ -432,8 +567,8 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
                 Text = title,
                 ForeColor = Color.White,
                 Font = new Font("Segoe UI Semibold", 13F),
-                Location = new Point(16, 14),
-                AutoSize = true
+                AutoSize = true,
+                Location = new Point(0, 0)
             };
 
             var lblSubtitle = new Label
@@ -441,12 +576,15 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
                 Text = subtitle,
                 ForeColor = Color.FromArgb(220, 240, 255),
                 Font = new Font("Segoe UI", 9F),
-                Location = new Point(16, 38),
-                AutoSize = true
+                AutoSize = false,
+                Dock = DockStyle.Fill,
+                Padding = new Padding(0, 28, 0, 0)
             };
 
-            header.Controls.Add(lblTitle);
             header.Controls.Add(lblSubtitle);
+            header.Controls.Add(lblTitle);
+            lblTitle.BringToFront();
+
             panel.Controls.Add(header);
 
             return panel;
