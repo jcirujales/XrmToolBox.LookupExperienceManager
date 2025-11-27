@@ -223,7 +223,8 @@ namespace BulkLookupConfiguration.XrmToolBoxTool.Services
             {
                 result.IsInlineNewEnabled = GetBool(parameters, "IsInlineNewEnabled", true);
                 result.DisableMru = GetBool(parameters, "DisableMru", false);
-                result.UseMainFormDialogForCreate = GetBool(parameters, "useMainFormDialogForCreate", false);
+                // useMainFormDialogForCreate and useMainFormDialogForEdit should remain with first letter as lowercase as defined in customizations.xml!
+                result.UseMainFormDialogForCreate = GetBool(parameters, "useMainFormDialogForCreate", false); 
                 result.UseMainFormDialogForEdit = GetBool(parameters, "useMainFormDialogForEdit", false);
             }
 

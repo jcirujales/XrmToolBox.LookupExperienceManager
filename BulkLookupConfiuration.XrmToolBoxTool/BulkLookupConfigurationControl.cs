@@ -232,6 +232,23 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
             chkMainFormEdit.Enabled = true;
             btnSavePublish.Visible = true;
             btnSavePublish.Text = $"Save and Publish ({selected.Count})";
+
+            SetTriStateCheckBox(chkDisableNew, selected, "IsInlineNewEnabled");
+            SetTriStateCheckBox(chkDisableMru, selected, "DisableMru");
+            SetTriStateCheckBox(chkMainFormCreate, selected, "UseMainFormDialogForCreate");
+            SetTriStateCheckBox(chkMainFormEdit, selected, "UseMainFormDialogForEdit");
+        }
+
+        private void SetTriStateCheckBox(CheckBox checkBox, List<DataGridViewRow> selectedRows, string columnName)
+        {
+            var values = selectedRows.Select(r => (bool)r.Cells[columnName].Value);
+
+            if (values.All(v => v))
+                checkBox.CheckState = CheckState.Checked;
+            else if (values.Any(v => v))
+                checkBox.CheckState = CheckState.Indeterminate;
+            else
+                checkBox.CheckState = CheckState.Unchecked;
         }
 
         public class LookupInfo
@@ -373,6 +390,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
             var panelLookups = CreateModernPanel("Lookup Controls", "Select lookup fields to configure");
            
             GridLookups = CreateStyledGrid();
+            GridLookups.SelectionChanged += GridLookups_SelectionChanged;
             GridLookups.MultiSelect = true;
             GridLookups.AutoGenerateColumns = false; // ← CRITICAL
 
@@ -380,44 +398,44 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
             {
                 new DataGridViewTextBoxColumn
                 {
-                    HeaderText = "source Entity",
-                    Name = "sourceEntity",   // ← Named!
-                    DataPropertyName="schemaName",
+                    HeaderText = "Source Entity",
+                    Name = "SourceEntity",
+                    DataPropertyName="SourceEntity",
                     FillWeight = 25
                 },
                 new DataGridViewTextBoxColumn
                 {
                     HeaderText = "Form",
-                    Name = "form",
-                    DataPropertyName="form",
+                    Name = "Form",
+                    DataPropertyName="Form",
                     FillWeight = 25
                 },
                 new DataGridViewTextBoxColumn
                 {
                     HeaderText = "Label",
-                    Name = "label",    // ← Combined label
-                    DataPropertyName="label",
+                    Name = "Label",
+                    DataPropertyName="Label",
                     FillWeight = 25
                 },
                 new DataGridViewTextBoxColumn
                 {
                     HeaderText = "Schema Name",
-                    Name = "schemaName",
-                    DataPropertyName="schemaName",
+                    Name = "SchemaName",
+                    DataPropertyName="SchemaName",
                     FillWeight = 25
                 },
                 new DataGridViewCheckBoxColumn
                 {
                     HeaderText = "Disable MRU",
-                    Name = "disableMru",
-                    DataPropertyName="disableMru",
+                    Name = "DisableMru",
+                    DataPropertyName="DisableMru",
                     FillWeight = 20
                 },
                 new DataGridViewCheckBoxColumn
                 {
                     HeaderText = "+ New",
-                    Name = "isInlineNewEnabled",
-                    DataPropertyName="isInlineNewEnabled",
+                    Name = "IsInlineNewEnabled",
+                    DataPropertyName="IsInlineNewEnabled",
                     FillWeight = 20
                 },
                 new DataGridViewCheckBoxColumn
@@ -559,6 +577,11 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
 
             this.Controls.Add(mainLayout);
             this.Controls.SetChildIndex(mainLayout, 0);
+        }
+
+        private void GridLookups_SelectionChanged(object sender, EventArgs e)
+        {
+            UpdateConfigPanel();
         }
 
         private DataGridView CreateStyledGrid()
