@@ -137,7 +137,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
                         GridTables.Rows.Add(name, entity.LogicalName);
                     }
 
-                    GridLookups.Rows.Clear();
+                    GridLookups.DataSource = null;
                     UpdateConfigPanel();
                 }));
             });
@@ -147,12 +147,12 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
         {
             if (GridTables.SelectedRows.Count == 0)
             {
-                GridLookups.Rows.Clear();
+                GridLookups.DataSource = null;
                 UpdateConfigPanel();
                 return;
             }
 
-            var logicalName = GridTables.SelectedRows[0].Cells[1].Value?.ToString();
+            var logicalName = GridTables.SelectedRows[0].Cells["schemaName"].Value?.ToString();
             if (string.IsNullOrEmpty(logicalName)) return;
 
             LoadReverseLookupsUsingOneToMany(logicalName);
@@ -363,8 +363,8 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
             GridTables.SelectionChanged += GridTables_SelectionChanged;
             GridTables.Columns.AddRange(new DataGridViewColumn[]
             {
-                new DataGridViewTextBoxColumn { HeaderText = "Display Name", FillWeight = 55 },
-                new DataGridViewTextBoxColumn { HeaderText = "Schema Name", FillWeight = 45 }
+                new DataGridViewTextBoxColumn { HeaderText = "Display Name", FillWeight = 55, Name = "displayName", DataPropertyName="displayName" },
+                new DataGridViewTextBoxColumn { HeaderText = "Schema Name", FillWeight = 45, Name = "schemaName", DataPropertyName="schemaName" }
             });
             panelTables.Controls.Add(GridTables);
             panelTables.Controls.SetChildIndex(GridTables, 0);
@@ -380,50 +380,58 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
             {
                 new DataGridViewTextBoxColumn
                 {
-                    HeaderText = "Source Entity",
-                    DataPropertyName = "SourceEntity",   // ← Named!
+                    HeaderText = "source Entity",
+                    Name = "sourceEntity",   // ← Named!
+                    DataPropertyName="schemaName",
                     FillWeight = 25
                 },
                 new DataGridViewTextBoxColumn
                 {
                     HeaderText = "Form",
-                    DataPropertyName = "Form",
+                    Name = "form",
+                    DataPropertyName="form",
                     FillWeight = 25
                 },
                 new DataGridViewTextBoxColumn
                 {
                     HeaderText = "Label",
-                    DataPropertyName = "Label",    // ← Combined label
+                    Name = "label",    // ← Combined label
+                    DataPropertyName="label",
                     FillWeight = 25
                 },
                 new DataGridViewTextBoxColumn
                 {
                     HeaderText = "Schema Name",
-                    DataPropertyName = "SchemaName",
+                    Name = "schemaName",
+                    DataPropertyName="schemaName",
                     FillWeight = 25
                 },
                 new DataGridViewCheckBoxColumn
                 {
                     HeaderText = "Disable MRU",
-                    DataPropertyName = "DisableMru",
+                    Name = "disableMru",
+                    DataPropertyName="disableMru",
                     FillWeight = 20
                 },
                 new DataGridViewCheckBoxColumn
                 {
                     HeaderText = "+ New",
-                    DataPropertyName = "IsInlineNewEnabled",
+                    Name = "isInlineNewEnabled",
+                    DataPropertyName="isInlineNewEnabled",
                     FillWeight = 20
                 },
                 new DataGridViewCheckBoxColumn
                 {
                     HeaderText = "Main Form (Create)",
-                    DataPropertyName = "UseMainFormDialogForCreate",
+                    Name = "useMainFormDialogForCreate",
+                    DataPropertyName="useMainFormDialogForCreate",
                     FillWeight = 20
                 },
                 new DataGridViewCheckBoxColumn
                 {
                     HeaderText = "Main Form (Edit)",
-                    DataPropertyName = "UseMainFormDialogForEdit",
+                    Name = "useMainFormDialogForEdit",
+                    DataPropertyName="useMainFormDialogForEdit",
                     FillWeight = 20
                 },
             });
