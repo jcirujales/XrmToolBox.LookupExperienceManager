@@ -164,11 +164,14 @@ namespace BulkLookupConfiguration.XrmToolBoxTool.Services
 
                 foreach (var form in forms.Entities)
                 {
-                    var formConfigSettings = GetLookupConfigurationSettings(form.GetAttributeValue<string>("formxml"), lookupField);
+                    var formXml = form.GetAttributeValue<string>("formxml");
+                    var formConfigSettings = GetLookupConfigurationSettings(formXml, lookupField);
                     
                     results.Add(new LookupInfo
                     {
                         Form = form.GetAttributeValue<string>("name"),
+                        FormId = form.Id,
+                        FormXml = formXml,
                         SourceEntity = sourceEntity,
                         Label = formConfigSettings.Label,
                         SchemaName = lookupField,

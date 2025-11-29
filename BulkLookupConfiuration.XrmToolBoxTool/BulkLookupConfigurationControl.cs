@@ -3,6 +3,7 @@ using BulkLookupConfiguration.XrmToolBoxTool.forms;
 using BulkLookupConfiguration.XrmToolBoxTool.model;
 using BulkLookupConfiguration.XrmToolBoxTool.Services;
 using McTools.Xrm.Connection;
+using Microsoft.Crm.Sdk.Messages;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;
 using System;
@@ -10,7 +11,9 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using System.Xml.Linq;
 using XrmToolBox.Extensibility;
+using static Microsoft.IdentityModel.Protocols.WSFederation.WSFederationConstants;
 using Label = System.Windows.Forms.Label;
 
 namespace BulkLookupConfiguration.XrmToolBoxTool
@@ -255,6 +258,8 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
         {
             public string SourceEntity { get; set; }
             public string Form { get; set; }
+            public Guid FormId { get; set; }
+            public string FormXml{ get; set; }
             public string Label { get; set; }
             public string SchemaName { get; set; }
             public bool IsInlineNewEnabled { get; set; }
@@ -359,6 +364,142 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
             });
         }
 
+        private void btnSavePublish_Click(object sender, EventArgs e)
+        {
+            var selectedRows = GridLookups.SelectedRows.Cast<DataGridViewRow>().ToList();
+            if (selectedRows.Count == 0)
+                return;
+
+            WorkAsync(new WorkAsyncInfo
+            {
+                Message = $"Saving and publishing {selectedRows.Count} form{(selectedRows.Count > 1 ? "s" : "")}...",
+                Work = (worker, args) =>
+                {
+                    var modifiedForms = new HashSet<string>(); // Track form IDs to publish
+
+                    foreach (DataGridViewRow row in selectedRows)
+                    {
+                        var schemaName = row.Cells["SchemaName"].Value?.ToString();
+                        var sourceEntity = row.Cells["SourceEntity"].Value?.ToString();
+                        var formName = row.Cells["Form"].Value?.ToString();
+                        var formId = new Guid(row.Cells["FormId"].Value?.ToString());
+                        var formXml = row.Cells["FormXml"].Value?.ToString();
+
+                        if (string.IsNullOrEmpty(schemaName) || string.IsNullOrEmpty(sourceEntity))
+                            continue;
+
+                        var formToUpdate = new Entity("systemform", formId)
+                        {
+                            ["formxml"] = formXml
+                        };
+
+                        if (string.IsNullOrEmpty(formXml)) continue;
+
+                        // Parse and update XML
+                        var updatedXml = UpdateFormXmlLookupSettings(
+                            formXml,
+                            schemaName,
+                            chkDisableNew.CheckState,
+                            chkDisableMru.CheckState,
+                            chkMainFormCreate.CheckState,
+                            chkMainFormEdit.CheckState
+                        );
+
+                        if (updatedXml != formXml)
+                        {
+                            // Save updated form
+                            formToUpdate["formxml"] = updatedXml;
+                            Service.Update(formToUpdate);
+                            modifiedForms.Add(sourceEntity); // Publish entity
+                        }
+                    }
+
+                    // Publish all modified entities
+                    foreach (var entity in modifiedForms)
+                    {
+                        var request = new PublishXmlRequest
+                        {
+                            ParameterXml = $"<importexportxml><entities><entity>{entity}</entity></entities></importexportxml>"
+                        };
+                        Service.Execute(request);
+                    }
+
+                    args.Result = selectedRows.Count;
+                },
+                PostWorkCallBack = args =>
+                {
+                    if (args.Error != null)
+                    {
+                        MessageBox.Show($"Error: {args.Error.Message}", "Save Failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+
+                    var count = (int)args.Result;
+                    MessageBox.Show($"Successfully saved and published {count} form{(count > 1 ? "s" : "")}!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                    // Optional: refresh grid
+                    if (GridTables.SelectedRows.Count > 0)
+                    {
+                        var logicalName = GridTables.SelectedRows[0].Cells["schemaName"].Value?.ToString();
+                        if (!string.IsNullOrEmpty(logicalName))
+                            LoadReverseLookupsUsingOneToMany(logicalName);
+                    }
+                }
+            });
+        }
+
+        private string UpdateFormXmlLookupSettings(
+            string formXml, 
+            string schemaName,
+            CheckState isInlineNewEnabled,
+            CheckState disableMru,
+            CheckState mainFormCreate,
+            CheckState mainFormEdit)
+        {
+            var doc = XDocument.Parse(formXml);
+            var changed = false;
+
+            var controls = doc.Descendants("control")
+                .Where(c => c.Attribute("datafieldname")?.Value == schemaName);
+
+            foreach (var control in controls)
+            {
+                var parameters = control.Element("parameters") ?? new XElement("parameters");
+                if (parameters.Parent == null) control.Add(parameters);
+
+                var settings = new[]
+                    {
+                        ("IsInlineNewEnabled", isInlineNewEnabled),
+                        ("DisableMru", disableMru),
+                        ("useMainFormDialogForCreate", mainFormCreate),
+                        ("useMainFormDialogForEdit", mainFormEdit)
+                    };
+                foreach (var (name, state) in settings)
+                {
+                    if (state != CheckState.Indeterminate)
+                    {
+                        UpdateParameter(parameters, name, state == CheckState.Checked);
+                        changed = true;
+                    }
+                }
+            }
+
+            return changed ? doc.ToString() : formXml;
+        }
+
+        private void UpdateParameter(XElement parameters, string name, bool value)
+        {
+            var param = parameters.Element(name);
+            if (param == null)
+            {
+                parameters.Add(new XElement(name, value.ToString().ToLower()));
+            }
+            else if (param.Value != value.ToString().ToLower())
+            {
+                param.Value = value.ToString().ToLower();
+            }
+        }
+
         private void SetupModernLayout()
         {
             var mainLayout = new TableLayoutPanel
@@ -408,6 +549,22 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
                     HeaderText = "Form",
                     Name = "Form",
                     DataPropertyName="Form",
+                    FillWeight = 25
+                },
+                new DataGridViewTextBoxColumn
+                {
+                    HeaderText = "Form ID",
+                    Name = "FormId",
+                    DataPropertyName="FormId",
+                    Visible = false,
+                    FillWeight = 25
+                },
+                new DataGridViewTextBoxColumn
+                {
+                    HeaderText = "Form XML",
+                    Name = "FormXml",
+                    DataPropertyName="FormXml",
+                    Visible = false,
                     FillWeight = 25
                 },
                 new DataGridViewTextBoxColumn
@@ -510,7 +667,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
 
             chkDisableNew = new CheckBox
             {
-                Text = "Disable + New button",
+                Text = "Enable + New button",
                 ForeColor = Color.White,
                 Font = new Font("Segoe UI", 10F),
                 AutoSize = true,
@@ -560,10 +717,11 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
                 Visible = false
             };
             btnSavePublish.FlatAppearance.BorderSize = 0;
+            btnSavePublish.Click += btnSavePublish_Click;
 
             content.Controls.Add(lblConfigMessage);
-            content.Controls.Add(chkDisableNew);
             content.Controls.Add(chkDisableMru);
+            content.Controls.Add(chkDisableNew);
             content.Controls.Add(chkMainFormCreate);
             content.Controls.Add(chkMainFormEdit);
             content.Controls.Add(btnSavePublish);
