@@ -13,7 +13,6 @@ using System.Linq;
 using System.Windows.Forms;
 using System.Xml.Linq;
 using XrmToolBox.Extensibility;
-using static Microsoft.IdentityModel.Protocols.WSFederation.WSFederationConstants;
 using Label = System.Windows.Forms.Label;
 
 namespace BulkLookupConfiguration.XrmToolBoxTool
