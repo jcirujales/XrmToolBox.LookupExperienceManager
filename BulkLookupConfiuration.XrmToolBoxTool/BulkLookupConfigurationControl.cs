@@ -2,7 +2,6 @@
 using BulkLookupConfiguration.XrmToolBoxTool.Services;
 using McTools.Xrm.Connection;
 using Microsoft.Xrm.Sdk;
-using Microsoft.Xrm.Sdk.Query;
 using System;
 using System.Windows.Forms;
 using XrmToolBox.Extensibility;
@@ -12,14 +11,12 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
 {
     public partial class BulkLookupConfigurationControl : PluginControlBase
     {
-        public Label lblSelectedSolution;
         public Label lblConfigMessage;
         public Label lblTitle;
         public Panel statusPanel;
         public ToolStrip toolbar;
-        public ToolStripButton btnClose;
         public ToolStripButton btnSolutions;
-        public ToolStripButton btnSample;
+        public ToolStripLabel lblSelectedSolution;
         public Settings mySettings;
         public CheckBox chkDisableNew;
         public CheckBox chkDisableMru;
@@ -37,11 +34,10 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
             this.Load += BulkLookupConfigurationControl_Load;
             this.OnCloseTool += BulkLookupConfigurationControl_OnCloseTool;
 
-            btnClose.Click += (s, e) => CloseTool();
-            btnSolutions.Click += (s, e) => SolutionActions.LoadSolutions(this);
-            btnSavePublish.Click += (s, e) => SolutionActions.SaveAndPublishCustomizations(this, Service);
-            gridLookups.SelectionChanged += (s, e) => SolutionActions.UpdateConfigPanel(this);
-            gridTables.SelectionChanged += (s, e) => SolutionActions.OnTargetEntitySelect(this, Service);
+            btnSolutions.Click += (s, e) => ExecuteMethod(() => SolutionActions.LoadSolutions(this));
+            btnSavePublish.Click += (s, e) => ExecuteMethod(() => SolutionActions.SaveAndPublishCustomizations(this, Service));
+            gridLookups.SelectionChanged += (s, e) => ExecuteMethod(() => SolutionActions.UpdateConfigPanel(this));
+            gridTables.SelectionChanged += (s, e) => ExecuteMethod(() => SolutionActions.OnTargetEntitySelect(this, Service));
             
         }
         /// <summary>
@@ -74,7 +70,6 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
         }
         private void LoadSettings()
         {
-            ShowInfoNotification("Welcome to Lookup Experience Manager", new Uri("https://github.com/MscrmTools/XrmToolBox"));
             if (!SettingsManager.Instance.TryLoad(GetType(), out mySettings))
             {
                 mySettings = new Settings();
@@ -84,27 +79,6 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
             {
                 LogInfo("Settings loaded successfully");
             }
-        }
-        
-        private void tsbSample_Click(object sender, EventArgs e) => ExecuteMethod(GetAccounts);
-
-        private void GetAccounts()
-        {
-            WorkAsync(new WorkAsyncInfo
-            {
-                Message = "Getting accounts",
-                Work = (worker, args) =>
-                {
-                    args.Result = Service.RetrieveMultiple(new QueryExpression("account") { TopCount = 50 });
-                },
-                PostWorkCallBack = args =>
-                {
-                    if (args.Error != null)
-                        MessageBox.Show(args.Error.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    else if (args.Result is EntityCollection ec)
-                        MessageBox.Show($"Found {ec.Entities.Count} accounts");
-                }
-            });
         }
     }
 }

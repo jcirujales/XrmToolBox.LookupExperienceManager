@@ -29,18 +29,16 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
                 Padding = new Padding(0, 8, 0, 0)
             };
 
-            mainControl.lblSelectedSolution = new Label
+            mainControl.lblSelectedSolution = new ToolStripLabel("No solution selected")
             {
-                Text = "No solution selected",
                 ForeColor = Color.FromArgb(180, 200, 255),
                 Font = new Font("Segoe UI", 10F),
-                AutoSize = true,
-                Dock = DockStyle.Right,
-                Padding = new Padding(0, 10, 20, 0)
+                Alignment = ToolStripItemAlignment.Right,
+                Margin = new Padding(15, 0, 0, 0),
+                AutoSize = true
             };
 
             mainControl.statusPanel.Controls.Add(mainControl.lblTitle);
-            mainControl.statusPanel.Controls.Add(mainControl.lblSelectedSolution);
 
             mainControl.toolbar = new ToolStrip
             {
@@ -51,28 +49,15 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
                 Renderer = new ToolStripProfessionalRenderer(new CustomColors())
             };
 
-            mainControl.btnClose = new ToolStripButton("Close Tool")
-            {
-                Alignment = ToolStripItemAlignment.Right
-            };
-            
-
             mainControl.btnSolutions = new ToolStripButton("Select Solution")
             {
                 Image = Properties.Resources.Solutions_32,
                 ImageScaling = ToolStripItemImageScaling.None,
                 ToolTipText = "Select a solution to analyze"
             };
-            mainControl.btnSample = new ToolStripButton("Sample Query")
-            {
-                ToolTipText = "Run sample account query"
-            };
 
             mainControl.toolbar.Items.Add(mainControl.btnSolutions);
-            mainControl.toolbar.Items.Add(new ToolStripSeparator());
-            mainControl.toolbar.Items.Add(mainControl.btnSample);
-            mainControl.toolbar.Items.Add(new ToolStripSeparator { Margin = new Padding(20, 0, 20, 0) });
-            mainControl.toolbar.Items.Add(mainControl.btnClose);
+            mainControl.toolbar.Items.Add(mainControl.lblSelectedSolution);
 
             mainControl.Controls.Add(mainControl.toolbar);
             mainControl.Controls.Add(mainControl.statusPanel);
@@ -110,7 +95,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
             mainControl.gridLookups = CreateStyledGrid();
             mainControl.gridLookups.MultiSelect = true;
             mainControl.gridLookups.AutoGenerateColumns = false; // ← CRITICAL
-            
+
             mainControl.gridLookups.Columns.AddRange(new DataGridViewColumn[]
             {
                 new DataGridViewTextBoxColumn
@@ -283,7 +268,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
 
             mainControl.btnSavePublish = new Button
             {
-                Text = "Save & Publish",
+                Text = "Save and Publish",
                 BackColor = Color.FromArgb(0, 122, 204),
                 ForeColor = Color.White,
                 Font = new Font("Segoe UI", 10F, FontStyle.Bold),
@@ -293,7 +278,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
                 Visible = false
             };
             mainControl.btnSavePublish.FlatAppearance.BorderSize = 0;
-            
+
 
             content.Controls.Add(mainControl.lblConfigMessage);
             content.Controls.Add(mainControl.chkDisableMru);
