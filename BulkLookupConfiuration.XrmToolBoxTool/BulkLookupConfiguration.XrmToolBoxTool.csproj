@@ -237,9 +237,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Actions\SolutionActions.cs" />
+    <Compile Include="BulkLookupConfigurationLayout.cs" />
     <Compile Include="Forms\SolutionPicker.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Model\CustomColors.cs" />
+    <Compile Include="Model\LookupInfo.cs" />
     <Compile Include="Model\Solution.cs" />
     <Compile Include="BulkLookupConfigurationPlugin.cs" />
     <Compile Include="BulkLookupConfigurationControl.cs">

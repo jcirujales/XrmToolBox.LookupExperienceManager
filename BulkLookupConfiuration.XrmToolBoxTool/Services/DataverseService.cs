@@ -1,4 +1,5 @@
-﻿using Microsoft.Crm.Sdk.Messages;
+﻿using BulkLookupConfiguration.XrmToolBoxTool.Model;
+using Microsoft.Crm.Sdk.Messages;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Messages;
 using Microsoft.Xrm.Sdk.Metadata;
@@ -8,7 +9,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
-using static BulkLookupConfiguration.XrmToolBoxTool.BulkLookupConfigurationControl;
 
 namespace BulkLookupConfiguration.XrmToolBoxTool.Services
 {
@@ -25,10 +25,10 @@ namespace BulkLookupConfiguration.XrmToolBoxTool.Services
                 Criteria = new FilterExpression
                 {
                     Conditions =
-                            {
-                                new ConditionExpression("solutionid", ConditionOperator.Equal, selectedSolutionId),
-                                new ConditionExpression("componenttype", ConditionOperator.Equal, 1)
-                            }
+                    {
+                        new ConditionExpression("solutionid", ConditionOperator.Equal, selectedSolutionId),
+                        new ConditionExpression("componenttype", ConditionOperator.Equal, 1)
+                    }
                 }
             };
 
@@ -46,9 +46,9 @@ namespace BulkLookupConfiguration.XrmToolBoxTool.Services
                     Criteria = new MetadataFilterExpression(LogicalOperator.And)
                     {
                         Conditions =
-                                {
-                                    new MetadataConditionExpression("MetadataId", MetadataConditionOperator.In, metadataIds)
-                                }
+                        {
+                            new MetadataConditionExpression("MetadataId", MetadataConditionOperator.In, metadataIds)
+                        }
                     },
                     Properties = new MetadataPropertiesExpression
                     {
@@ -86,20 +86,20 @@ namespace BulkLookupConfiguration.XrmToolBoxTool.Services
                     Criteria = new MetadataFilterExpression(LogicalOperator.And)
                     {
                         Conditions =
-                                {
-                                    new MetadataConditionExpression("LogicalName", MetadataConditionOperator.Equals, targetEntityLogicalName)
-                                }
+                        {
+                            new MetadataConditionExpression("LogicalName", MetadataConditionOperator.Equals, targetEntityLogicalName)
+                        }
                     },
                     RelationshipQuery = new RelationshipQueryExpression
                     {
                         Criteria = new MetadataFilterExpression(LogicalOperator.And)
                         {
                             Conditions =
-                                    {
-                                        new MetadataConditionExpression("RelationshipType", MetadataConditionOperator.Equals, Microsoft.Xrm.Sdk.Metadata.RelationshipType.OneToManyRelationship),
-                                        new MetadataConditionExpression("IsValidForAdvancedFind", MetadataConditionOperator.Equals, true),
-                                        new MetadataConditionExpression("IsCustomizable", MetadataConditionOperator.Equals, true),
-                                    }
+                            {
+                                new MetadataConditionExpression("RelationshipType", MetadataConditionOperator.Equals, Microsoft.Xrm.Sdk.Metadata.RelationshipType.OneToManyRelationship),
+                                new MetadataConditionExpression("IsValidForAdvancedFind", MetadataConditionOperator.Equals, true),
+                                new MetadataConditionExpression("IsCustomizable", MetadataConditionOperator.Equals, true),
+                            }
                         }
                     }
                 }
