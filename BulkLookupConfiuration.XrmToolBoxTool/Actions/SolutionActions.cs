@@ -21,7 +21,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool.Actions
             BulkLookupConfigurationControl mainControl,
             IOrganizationService orgService)
         {
-            if (mainControl.gridTables.SelectedRows.Count == 0)
+            if (mainControl.isSystemUpdate || mainControl.gridTables.SelectedRows.Count == 0)
             {
                 mainControl.gridLookups.DataSource = null;
                 UpdateConfigPanel(mainControl);
@@ -102,14 +102,16 @@ namespace BulkLookupConfiguration.XrmToolBoxTool.Actions
             {
                 mainControl.Invoke((MethodInvoker)(() =>
                 {
-                    mainControl.gridTables.ClearSelection();
                     mainControl.gridTables.Rows.Clear();
+                    mainControl.isSystemUpdate = true;
 
                     foreach (var entity in entities)
                     {
                         var name = entity.DisplayName?.UserLocalizedLabel?.Label ?? entity.LogicalName;
                         mainControl.gridTables.Rows.Add(name, entity.LogicalName);
                     }
+                    mainControl.isSystemUpdate = false;
+                    mainControl.gridTables.ClearSelection();
 
                     mainControl.gridLookups.DataSource = null;
                     UpdateConfigPanel(mainControl);

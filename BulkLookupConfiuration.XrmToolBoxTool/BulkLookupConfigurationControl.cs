@@ -11,6 +11,8 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
 {
     public partial class BulkLookupConfigurationControl : PluginControlBase
     {
+        public bool isSystemUpdate = true;
+
         public Label lblConfigMessage;
         public Label lblTitle;
         public Panel statusPanel;
