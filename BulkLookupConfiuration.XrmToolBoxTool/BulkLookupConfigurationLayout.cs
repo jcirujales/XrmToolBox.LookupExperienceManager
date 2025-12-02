@@ -1,5 +1,9 @@
 ﻿using BulkLookupConfiguration.XrmToolBoxTool.Model;
+using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace BulkLookupConfiguration.XrmToolBoxTool
@@ -81,11 +85,14 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
             // LEFT: Target Entity
             var panelTables = CreateModernPanel("Target Entity", "Select a target entity to see all lookup controls pointing to it");
             mainControl.gridTables = CreateStyledGrid();
-            mainControl.gridTables.Columns.AddRange(new DataGridViewColumn[]
-            {
-                new DataGridViewTextBoxColumn { HeaderText = "Display Name", FillWeight = 55, Name = "displayName", DataPropertyName="displayName" },
-                new DataGridViewTextBoxColumn { HeaderText = "Schema Name", FillWeight = 45, Name = "schemaName", DataPropertyName="schemaName" }
-            });
+            mainControl.gridTables.Focus();
+
+            var displayNameColumn = new DataGridViewTextBoxColumn { HeaderText = "Display Name", FillWeight = 55, Name = "displayName", DataPropertyName = "displayName" };
+            var gridTableSchemaNameColumn = new DataGridViewTextBoxColumn { HeaderText = "Schema Name", FillWeight = 45, Name = "schemaName", DataPropertyName = "schemaName" };
+
+            mainControl.gridTables.Columns.AddRange(new DataGridViewColumn[]{ displayNameColumn, gridTableSchemaNameColumn });
+
+            SetSearchBox(mainControl, mainControl.gridTables, panelTables, displayNameColumn.DataPropertyName, gridTableSchemaNameColumn.DataPropertyName);
             panelTables.Controls.Add(mainControl.gridTables);
             panelTables.Controls.SetChildIndex(mainControl.gridTables, 0);
 
@@ -94,84 +101,95 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
 
             mainControl.gridLookups = CreateStyledGrid();
             mainControl.gridLookups.MultiSelect = true;
-            mainControl.gridLookups.AutoGenerateColumns = false; // ← CRITICAL
+            mainControl.gridLookups.AutoGenerateColumns = false;
 
+            var sourceEntityColumn = new DataGridViewTextBoxColumn
+            {
+                HeaderText = "Source Entity",
+                Name = "SourceEntity",
+                DataPropertyName = "SourceEntity",
+                FillWeight = 25
+            };
+            var formColumn = new DataGridViewTextBoxColumn
+            {
+                HeaderText = "Form",
+                Name = "Form",
+                DataPropertyName = "Form",
+                FillWeight = 25
+            };
+            var formIdColumn = new DataGridViewTextBoxColumn
+            {
+                HeaderText = "Form ID",
+                Name = "FormId",
+                DataPropertyName = "FormId",
+                Visible = false,
+                FillWeight = 25
+            };
+            var formXmlColumn = new DataGridViewTextBoxColumn
+            {
+                HeaderText = "Form XML",
+                Name = "FormXml",
+                DataPropertyName = "FormXml",
+                Visible = false,
+                FillWeight = 25
+            };
+            var labelColumn = new DataGridViewTextBoxColumn
+            {
+                HeaderText = "Control Form Label",
+                Name = "Label",
+                DataPropertyName = "Label",
+                FillWeight = 25
+            };
+            var LookupSchemaNameColumn = new DataGridViewTextBoxColumn
+            {
+                HeaderText = "Schema Name",
+                Name = "SchemaName",
+                DataPropertyName = "SchemaName",
+                FillWeight = 25
+            };
+            var disableMRUColumn = new DataGridViewCheckBoxColumn
+            {
+                HeaderText = "Disable MRU",
+                Name = "DisableMru",
+                DataPropertyName = "DisableMru",
+                FillWeight = 20
+            };
+            var isInlineEditableColumn = new DataGridViewCheckBoxColumn
+            {
+                HeaderText = "+ New",
+                Name = "IsInlineNewEnabled",
+                DataPropertyName = "IsInlineNewEnabled",
+                FillWeight = 20
+            };
+            var isMainFormCreateEnabledColumn = new DataGridViewCheckBoxColumn
+            {
+                HeaderText = "Main Form (Create)",
+                Name = "useMainFormDialogForCreate",
+                DataPropertyName = "useMainFormDialogForCreate",
+                FillWeight = 20
+            };
+            var isMainFormEditEnabledColumn = new DataGridViewCheckBoxColumn
+            {
+                HeaderText = "Main Form (Edit)",
+                Name = "useMainFormDialogForEdit",
+                DataPropertyName = "useMainFormDialogForEdit",
+                FillWeight = 20
+            };
             mainControl.gridLookups.Columns.AddRange(new DataGridViewColumn[]
             {
-                new DataGridViewTextBoxColumn
-                {
-                    HeaderText = "Source Entity",
-                    Name = "SourceEntity",
-                    DataPropertyName="SourceEntity",
-                    FillWeight = 25
-                },
-                new DataGridViewTextBoxColumn
-                {
-                    HeaderText = "Form",
-                    Name = "Form",
-                    DataPropertyName="Form",
-                    FillWeight = 25
-                },
-                new DataGridViewTextBoxColumn
-                {
-                    HeaderText = "Form ID",
-                    Name = "FormId",
-                    DataPropertyName="FormId",
-                    Visible = false,
-                    FillWeight = 25
-                },
-                new DataGridViewTextBoxColumn
-                {
-                    HeaderText = "Form XML",
-                    Name = "FormXml",
-                    DataPropertyName="FormXml",
-                    Visible = false,
-                    FillWeight = 25
-                },
-                new DataGridViewTextBoxColumn
-                {
-                    HeaderText = "Label",
-                    Name = "Label",
-                    DataPropertyName="Label",
-                    FillWeight = 25
-                },
-                new DataGridViewTextBoxColumn
-                {
-                    HeaderText = "Schema Name",
-                    Name = "SchemaName",
-                    DataPropertyName="SchemaName",
-                    FillWeight = 25
-                },
-                new DataGridViewCheckBoxColumn
-                {
-                    HeaderText = "Disable MRU",
-                    Name = "DisableMru",
-                    DataPropertyName="DisableMru",
-                    FillWeight = 20
-                },
-                new DataGridViewCheckBoxColumn
-                {
-                    HeaderText = "+ New",
-                    Name = "IsInlineNewEnabled",
-                    DataPropertyName="IsInlineNewEnabled",
-                    FillWeight = 20
-                },
-                new DataGridViewCheckBoxColumn
-                {
-                    HeaderText = "Main Form (Create)",
-                    Name = "useMainFormDialogForCreate",
-                    DataPropertyName="useMainFormDialogForCreate",
-                    FillWeight = 20
-                },
-                new DataGridViewCheckBoxColumn
-                {
-                    HeaderText = "Main Form (Edit)",
-                    Name = "useMainFormDialogForEdit",
-                    DataPropertyName="useMainFormDialogForEdit",
-                    FillWeight = 20
-                },
+                sourceEntityColumn,
+                formColumn,
+                formIdColumn,
+                formXmlColumn,
+                labelColumn,
+                LookupSchemaNameColumn,
+                disableMRUColumn,
+                isInlineEditableColumn,
+                isMainFormCreateEnabledColumn,
+                isMainFormEditEnabledColumn,
             });
             panelLookups.Controls.Add(mainControl.gridLookups);
+
             panelLookups.Controls.SetChildIndex(mainControl.gridLookups, 0);
 
             // RIGHT: Configuration
@@ -373,5 +391,77 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
 
             return panel;
         }
+        private static void SetSearchBox(BulkLookupConfigurationControl mainControl, DataGridView grid, Panel panel, params string[] searchColumns)
+        {
+            mainControl.searchBox = new TextBox
+            {
+                Text = "Search...",
+                Dock = DockStyle.Top,
+                Height = 36,
+                Margin = new Padding(12, 12, 12, 0),
+                BackColor = Color.FromArgb(52, 58, 70),
+                ForeColor = Color.White,
+                BorderStyle = BorderStyle.FixedSingle,
+                Font = new Font("Segoe UI", 10F),
+                Padding = new Padding(32, 0, 12, 0),
+            };
+
+            // Placeholder color
+            mainControl.searchBox.GotFocus += (s, e) =>
+            {
+                if (mainControl.searchBox.Text == "Search...") mainControl.searchBox.Text = "";
+                mainControl.searchBox.ForeColor = Color.White;
+            };
+            mainControl.searchBox.LostFocus += (s, e) =>
+            {
+
+                mainControl.searchBox.ForeColor = Color.FromArgb(180, 180, 180);
+
+            };
+
+            List<object> originalData = new List<object>();
+
+            // Search logic — perfect
+            mainControl.searchBox.TextChanged += (s, e) =>
+            {
+                if (mainControl.isSystemUpdate) return;
+
+                mainControl.isSystemUpdate = true;
+                var initialRecordSet = (List<object>)grid.Tag ?? new List<object>();
+                try
+                {
+                    var term = mainControl.searchBox.Text.ToLower().Trim();
+                    if (string.IsNullOrEmpty(term) || term == "search...")
+                    {
+                        grid.DataSource = initialRecordSet;
+                    }
+                    else
+                    {
+                        var filtered = initialRecordSet
+                            .Where(item => searchColumns.Any(col =>
+                                item.GetType()
+                                    .GetProperty(col)?
+                                    .GetValue(item)?
+                                    .ToString()?
+                                    .IndexOf(term, StringComparison.OrdinalIgnoreCase) >= 0))
+                            .ToList();
+
+                        grid.DataSource = filtered;
+                    }
+                    grid.ClearSelection();
+                    mainControl.isSystemUpdate = false;
+                }
+                finally
+                {
+                    mainControl.isSystemUpdate = false;
+                }
+            };
+            mainControl.searchBox.TabStop = false;
+
+            // Add search box on top
+            panel.Controls.Add(mainControl.searchBox);
+            panel.Controls.SetChildIndex(mainControl.searchBox, 0);
+        }
+
     }
 }

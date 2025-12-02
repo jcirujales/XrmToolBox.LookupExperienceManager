@@ -1,8 +1,10 @@
 ﻿using BulkLookupConfiguration.XrmToolBoxTool.Actions;
+using BulkLookupConfiguration.XrmToolBoxTool.Model;
 using BulkLookupConfiguration.XrmToolBoxTool.Services;
 using McTools.Xrm.Connection;
 using Microsoft.Xrm.Sdk;
 using System;
+using System.Collections.Generic;
 using System.Windows.Forms;
 using XrmToolBox.Extensibility;
 using Label = System.Windows.Forms.Label;
@@ -25,6 +27,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
         public CheckBox chkMainFormCreate;
         public CheckBox chkMainFormEdit;
         public Button btnSavePublish;
+        public TextBox searchBox;
         public DataGridView gridTables;
         public DataGridView gridLookups;
 

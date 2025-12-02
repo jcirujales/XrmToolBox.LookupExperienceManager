@@ -21,7 +21,9 @@ namespace BulkLookupConfiguration.XrmToolBoxTool.Actions
             BulkLookupConfigurationControl mainControl,
             IOrganizationService orgService)
         {
-            if (mainControl.isSystemUpdate || mainControl.gridTables.SelectedRows.Count == 0)
+            if (mainControl.isSystemUpdate) return; 
+
+            if (mainControl.gridTables.SelectedRows.Count == 0)
             {
                 mainControl.gridLookups.DataSource = null;
                 UpdateConfigPanel(mainControl);
@@ -62,10 +64,13 @@ namespace BulkLookupConfiguration.XrmToolBoxTool.Actions
                         .ToList();
 
                     var results = DataverseService.GetLookupAttributeInfo(relationships, orgService);
-                    args.Result = results
+                    var lookups = results
                         .OrderBy(r => r.SourceEntity)
                         .ThenBy(r => r.Label)
                         .ToList();
+                    args.Result = lookups;
+
+                    mainControl.gridLookups.Tag = lookups.Cast<object>().ToList();
                 },
                 PostWorkCallBack = args =>
                 {
@@ -75,11 +80,11 @@ namespace BulkLookupConfiguration.XrmToolBoxTool.Actions
                         return;
                     }
 
-                    var lookups = (List<LookupInfo>)args.Result;
+                    var lookups = args.Result;
                     mainControl.gridLookups.Invoke((MethodInvoker)(() =>
                     {
                         mainControl.gridLookups.DataSource = null;
-                        mainControl.gridLookups.DataSource = lookups;  // ← Magic: binds by name
+                        mainControl.gridLookups.DataSource = lookups; 
                         mainControl.gridLookups.ClearSelection();
 
                         UpdateConfigPanel(mainControl);
@@ -102,14 +107,18 @@ namespace BulkLookupConfiguration.XrmToolBoxTool.Actions
             {
                 mainControl.Invoke((MethodInvoker)(() =>
                 {
-                    mainControl.gridTables.Rows.Clear();
                     mainControl.isSystemUpdate = true;
-
-                    foreach (var entity in entities)
+                    var tables = entities.Select(entity => new Table
                     {
-                        var name = entity.DisplayName?.UserLocalizedLabel?.Label ?? entity.LogicalName;
-                        mainControl.gridTables.Rows.Add(name, entity.LogicalName);
-                    }
+                        displayName = entity.DisplayName?.UserLocalizedLabel?.Label ?? entity.LogicalName,
+                        schemaName = entity.LogicalName
+                    }).ToList();
+
+                    mainControl.searchBox.Clear();
+
+                    mainControl.gridTables.Tag = tables.Cast<object>().ToList(); // store original loaded tables
+                    mainControl.gridTables.DataSource = tables;
+
                     mainControl.isSystemUpdate = false;
                     mainControl.gridTables.ClearSelection();
 
@@ -123,8 +132,11 @@ namespace BulkLookupConfiguration.XrmToolBoxTool.Actions
         {
             var selected = mainControl.gridLookups.Rows.Cast<DataGridViewRow>().Where(r => r.Selected).ToList();
 
+            if (mainControl.isSystemUpdate) return;
+
             if (selected.Count == 0)
             {
+                mainControl.gridLookups.ClearSelection();
                 mainControl.lblConfigMessage.Text = "Selected: 0 lookup controls";
                 mainControl.chkDisableNew.Enabled = false;
                 mainControl.chkDisableMru.Enabled = false;
