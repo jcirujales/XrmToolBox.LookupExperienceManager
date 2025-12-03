@@ -27,11 +27,13 @@ namespace BulkLookupConfiguration.XrmToolBoxTool.Actions
             {
                 mainControl.gridLookups.DataSource = null;
                 UpdateConfigPanel(mainControl);
-                   
+                mainControl.selectedTable.Text = "Selected Table: No tables selected.";
                 return;
             }
 
             var logicalName = mainControl.gridTables.SelectedRows[0].Cells["schemaName"].Value?.ToString();
+            var displayName = mainControl.gridTables.SelectedRows[0].Cells["displayName"].Value?.ToString();
+            mainControl.selectedTable.Text = $"Selected Table: {displayName} - {logicalName}";
             if (string.IsNullOrEmpty(logicalName)) return;
 
             LoadReverseLookupsUsingOneToMany(mainControl, logicalName, orgService);

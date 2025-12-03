@@ -26,6 +26,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
         public CheckBox chkMainFormEdit;
         public Button btnSavePublish;
         public TextBox searchBox;
+        public TextBox selectedTable;
         public DataGridView gridTables;
         public DataGridView gridLookups;
 

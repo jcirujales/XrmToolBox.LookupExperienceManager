@@ -188,7 +188,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
                 isMainFormEditEnabledColumn,
             });
 
-            AddSearchSpacer(mainControl, mainControl.gridLookups, panelLookups);
+            SetSelectedTable(mainControl, mainControl.gridLookups, panelLookups);
             panelLookups.Controls.Add(mainControl.gridLookups);
             panelLookups.Controls.SetChildIndex(mainControl.gridLookups, 0);
 
@@ -229,7 +229,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
             var content = new FlowLayoutPanel
             {
                 Dock = DockStyle.Fill,
-                Padding = new Padding(24),
+                // Padding = new Padding(1),
                 FlowDirection = FlowDirection.TopDown,
                 AutoSize = true,
                 WrapContents = false
@@ -241,7 +241,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
                 ForeColor = Color.FromArgb(180, 180, 255),
                 Font = new Font("Segoe UI", 10F, FontStyle.Bold),
                 AutoSize = true,
-                Margin = new Padding(0, 0, 0, 20)
+                Margin = new Padding(0, 0, 0, 10)
             };
 
             mainControl.chkDisableNew = new CheckBox
@@ -251,7 +251,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
                 Font = new Font("Segoe UI", 10F),
                 AutoSize = true,
                 Enabled = false,
-                Margin = new Padding(0, 0, 0, 12)
+                Margin = new Padding(10, 0, 0, 12)
             };
 
             mainControl.chkDisableMru = new CheckBox
@@ -261,7 +261,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
                 Font = new Font("Segoe UI", 10F),
                 AutoSize = true,
                 Enabled = false,
-                Margin = new Padding(0, 0, 0, 12)
+                Margin = new Padding(10, 0, 0, 12)
             };
 
             mainControl.chkMainFormCreate = new CheckBox
@@ -271,7 +271,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
                 Font = new Font("Segoe UI", 10F),
                 AutoSize = true,
                 Enabled = false,
-                Margin = new Padding(0, 0, 0, 12)
+                Margin = new Padding(10, 0, 0, 12)
             };
 
             mainControl.chkMainFormEdit = new CheckBox
@@ -281,7 +281,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
                 Font = new Font("Segoe UI", 10F),
                 AutoSize = true,
                 Enabled = false,
-                Margin = new Padding(0, 0, 0, 30)
+                Margin = new Padding(10, 0, 0, 30)
             };
 
             mainControl.btnSavePublish = new Button
@@ -391,29 +391,28 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
 
             return panel;
         }
-        private static void AddSearchSpacer(BulkLookupConfigurationControl mainControl, DataGridView grid, Panel panel)
+        private static void SetSelectedTable(BulkLookupConfigurationControl mainControl, DataGridView grid, Panel panel)
         {
-            var spacer = new TextBox
+            mainControl.selectedTable = new TextBox
             {
+                Text = "Selected Table: No tables selected.",
                 ReadOnly = true,
-                Enabled = false,
                 Dock = DockStyle.Top,
                 Height = 36,
                 Margin = new Padding(12, 12, 12, 0),
                 BackColor = Color.FromArgb(52, 58, 70),
-                ForeColor = Color.White,
                 BorderStyle = BorderStyle.FixedSingle,
-                Font = new Font("Segoe UI", 10F),
+                ForeColor = Color.FromArgb(180, 180, 255),
+                Font = new Font("Segoe UI", 10F, FontStyle.Bold),
                 Padding = new Padding(32, 0, 12, 0),
+                TabStop = false
             };
 
             List<object> originalData = new List<object>();
 
-            spacer.TabStop = false;
-
             // Add search box on top
-            panel.Controls.Add(spacer);
-            panel.Controls.SetChildIndex(spacer, 0);
+            panel.Controls.Add(mainControl.selectedTable);
+            panel.Controls.SetChildIndex(mainControl.selectedTable, 0);
         }
         private static void SetSearchBox(BulkLookupConfigurationControl mainControl, DataGridView grid, Panel panel, params string[] searchColumns)
         {
