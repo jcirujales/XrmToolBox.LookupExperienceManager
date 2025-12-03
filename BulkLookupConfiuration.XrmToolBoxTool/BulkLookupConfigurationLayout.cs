@@ -82,7 +82,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
             mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
 
             // LEFT: Target Entity
-            var panelTables = CreateModernPanel("Target Entity", "Select a target entity to see all lookup controls pointing to it");
+            var panelTables = CreateModernPanel("Tables", "Select a lookup table to see all of its related lookup controls.");
             mainControl.gridTables = CreateStyledGrid();
             mainControl.gridTables.Focus();
 
