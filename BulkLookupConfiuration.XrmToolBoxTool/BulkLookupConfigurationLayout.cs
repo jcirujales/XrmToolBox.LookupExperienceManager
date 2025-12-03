@@ -33,13 +33,13 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
             };
 
             mainControl.lblSelectedSolution = new ToolStripLabel("No solution selected")
-            {
-                ForeColor = Color.FromArgb(180, 200, 255),
-                Font = new Font("Segoe UI", 10F),
-                Alignment = ToolStripItemAlignment.Right,
-                Margin = new Padding(15, 0, 0, 0),
-                AutoSize = true
-            };
+             {
+                 ForeColor = Color.FromArgb(180, 200, 255),
+                 Font = new Font("Segoe UI", 10F),
+                 Alignment = ToolStripItemAlignment.Right,
+                 Margin = new Padding(15, 0, 0, 0),
+                 AutoSize = true
+             };
 
             mainControl.statusPanel.Controls.Add(mainControl.lblTitle);
 
@@ -65,7 +65,15 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
             mainControl.Controls.Add(mainControl.toolbar);
             mainControl.Controls.Add(mainControl.statusPanel);
         }
-
+        public static void ClearGridsAndSelections(BulkLookupConfigurationControl mainControl)
+        {
+            mainControl.gridTables.ClearSelection();
+            mainControl.gridTables.DataSource = null;
+            mainControl.gridLookups.ClearSelection();
+            mainControl.gridLookups.DataSource = null;
+            mainControl.lblSelectedSolution.Text = "No solution selected";
+            mainControl.lblSelectedSolution.ForeColor = Color.FromArgb(180, 200, 255);
+        }
         public static void SetupModernLayout(BulkLookupConfigurationControl mainControl)
         {
             var mainLayout = new TableLayoutPanel
@@ -151,14 +159,16 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
                 HeaderText = "Disable MRU",
                 Name = "DisableMru",
                 DataPropertyName = "DisableMru",
-                FillWeight = 20
+                FillWeight = 20,
+                ReadOnly = true,
             };
             var isInlineEditableColumn = new DataGridViewCheckBoxColumn
             {
                 HeaderText = "+ New",
                 Name = "IsInlineNewEnabled",
                 DataPropertyName = "IsInlineNewEnabled",
-                FillWeight = 20
+                FillWeight = 20,
+                ReadOnly = true,
             };
             var isMainFormCreateEnabledColumn = new DataGridViewCheckBoxColumn
             {
@@ -271,7 +281,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
                 Font = new Font("Segoe UI", 10F),
                 AutoSize = true,
                 Enabled = false,
-                Margin = new Padding(10, 0, 0, 12)
+                Margin = new Padding(10, 0, 0, 12),
             };
 
             mainControl.chkMainFormEdit = new CheckBox

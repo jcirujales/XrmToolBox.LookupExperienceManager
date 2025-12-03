@@ -61,6 +61,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
         public override void UpdateConnection(IOrganizationService newService, ConnectionDetail detail, string actionName, object parameter)
         {
             base.UpdateConnection(newService, detail, actionName, parameter);
+            BulkLookupConfigurationLayout.ClearGridsAndSelections(this);
             if (mySettings != null && detail != null)
             {
                 mySettings.LastUsedOrganizationWebappUrl = detail.WebApplicationUrl;

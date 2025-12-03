@@ -129,7 +129,6 @@ namespace BulkLookupConfiguration.XrmToolBoxTool.Actions
                 }));
             });
         }
-
         public static void UpdateConfigPanel(BulkLookupConfigurationControl mainControl)
         {
             var selected = mainControl.gridLookups.Rows.Cast<DataGridViewRow>().Where(r => r.Selected).ToList();
