@@ -114,7 +114,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool.Actions
                         schemaName = entity.LogicalName
                     }).ToList();
 
-                    mainControl.searchBox.Clear();
+                    if(mainControl.searchBox.Text.ToLower().Trim() != "search...") mainControl.searchBox.Clear();
 
                     mainControl.gridTables.Tag = tables.Cast<object>().ToList(); // store original loaded tables
                     mainControl.gridTables.DataSource = tables;

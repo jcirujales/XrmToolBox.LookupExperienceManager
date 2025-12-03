@@ -187,8 +187,9 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
                 isMainFormCreateEnabledColumn,
                 isMainFormEditEnabledColumn,
             });
-            panelLookups.Controls.Add(mainControl.gridLookups);
 
+            AddSearchSpacer(mainControl, mainControl.gridLookups, panelLookups);
+            panelLookups.Controls.Add(mainControl.gridLookups);
             panelLookups.Controls.SetChildIndex(mainControl.gridLookups, 0);
 
             // RIGHT: Configuration
@@ -389,6 +390,30 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
             panel.Controls.Add(header);
 
             return panel;
+        }
+        private static void AddSearchSpacer(BulkLookupConfigurationControl mainControl, DataGridView grid, Panel panel)
+        {
+            var spacer = new TextBox
+            {
+                ReadOnly = true,
+                Enabled = false,
+                Dock = DockStyle.Top,
+                Height = 36,
+                Margin = new Padding(12, 12, 12, 0),
+                BackColor = Color.FromArgb(52, 58, 70),
+                ForeColor = Color.White,
+                BorderStyle = BorderStyle.FixedSingle,
+                Font = new Font("Segoe UI", 10F),
+                Padding = new Padding(32, 0, 12, 0),
+            };
+
+            List<object> originalData = new List<object>();
+
+            spacer.TabStop = false;
+
+            // Add search box on top
+            panel.Controls.Add(spacer);
+            panel.Controls.SetChildIndex(spacer, 0);
         }
         private static void SetSearchBox(BulkLookupConfigurationControl mainControl, DataGridView grid, Panel panel, params string[] searchColumns)
         {
