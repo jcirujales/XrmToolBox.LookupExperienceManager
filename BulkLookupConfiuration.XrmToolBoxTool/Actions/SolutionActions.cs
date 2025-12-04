@@ -34,6 +34,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool.Actions
             var logicalName = mainControl.gridTables.SelectedRows[0].Cells["schemaName"].Value?.ToString();
             var displayName = mainControl.gridTables.SelectedRows[0].Cells["displayName"].Value?.ToString();
             mainControl.selectedTable.Text = $"Selected Table: {displayName} - {logicalName}";
+            mainControl.selectedTableSchemaName = logicalName;
             if (string.IsNullOrEmpty(logicalName)) return;
 
             LoadReverseLookupsUsingOneToMany(mainControl, logicalName, orgService);
@@ -85,14 +86,44 @@ namespace BulkLookupConfiguration.XrmToolBoxTool.Actions
                     var lookups = args.Result;
                     mainControl.gridLookups.Invoke((MethodInvoker)(() =>
                     {
+                        mainControl.isSystemUpdate = true;
                         mainControl.gridLookups.DataSource = null;
                         mainControl.gridLookups.DataSource = lookups; 
                         mainControl.gridLookups.ClearSelection();
 
                         UpdateConfigPanel(mainControl);
+                        mainControl.isSystemUpdate = false;
                     }));
                 }
             });
+        }
+        public static void RefreshMetadata(BulkLookupConfigurationControl mainControl, IOrganizationService orgService)
+        {
+            if (mainControl.selectedSolution != null)
+            {
+                OnSolutionSelected(mainControl, mainControl.selectedSolution);
+                if (!string.IsNullOrEmpty(mainControl.selectedTableSchemaName))
+                {
+                    mainControl.gridTables.Invoke((MethodInvoker)(() =>
+                    {
+                        // Find and select the row with matching DisplayName or SchemaName
+                        foreach (DataGridViewRow row in mainControl.gridTables.Rows)
+                        {
+                            var displayName = row.Cells["displayName"].Value?.ToString();
+                            var schemaName = row.Cells["schemaName"].Value?.ToString();
+
+                            if (schemaName == mainControl.selectedTableSchemaName)
+                            {
+                                row.Selected = true;
+                                mainControl.gridTables.CurrentCell = row.Cells[0];
+                                mainControl.gridTables.FirstDisplayedScrollingRowIndex = row.Index;
+                                OnTargetEntitySelect(mainControl, orgService);
+                                break;
+                            }
+                        }
+                    }));
+                }
+            }
         }
         public static void OnSolutionSelected(BulkLookupConfigurationControl mainControl, Solution selectedSolution)
         {
@@ -120,20 +151,19 @@ namespace BulkLookupConfiguration.XrmToolBoxTool.Actions
 
                     mainControl.gridTables.Tag = tables.Cast<object>().ToList(); // store original loaded tables
                     mainControl.gridTables.DataSource = tables;
-
-                    mainControl.isSystemUpdate = false;
                     mainControl.gridTables.ClearSelection();
-
                     mainControl.gridLookups.DataSource = null;
                     UpdateConfigPanel(mainControl);
+                    
+                    mainControl.isSystemUpdate = false;
                 }));
             });
         }
         public static void UpdateConfigPanel(BulkLookupConfigurationControl mainControl)
         {
-            var selected = mainControl.gridLookups.Rows.Cast<DataGridViewRow>().Where(r => r.Selected).ToList();
-
             if (mainControl.isSystemUpdate) return;
+
+            var selected = mainControl.gridLookups.Rows.Cast<DataGridViewRow>().Where(r => r.Selected).ToList();
 
             if (selected.Count == 0)
             {
@@ -394,6 +424,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool.Actions
                 {
                     if (picker.ShowDialog(mainControl) == DialogResult.OK && picker.SelectedSolution != null)
                     {
+                        mainControl.selectedSolution = picker.SelectedSolution;
                         OnSolutionSelected(mainControl, picker.SelectedSolution);
                     }
                 }

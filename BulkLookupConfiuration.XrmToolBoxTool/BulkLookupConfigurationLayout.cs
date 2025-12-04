@@ -59,7 +59,18 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
                 ToolTipText = "Select a solution to analyze"
             };
 
+            var toolStripSeparator = new ToolStripSeparator();
+
+            mainControl.btnRefresh = new ToolStripButton("Refresh")
+            {
+                //Image = Properties.Resources.Solutions_32,
+                ImageScaling = ToolStripItemImageScaling.None,
+                ToolTipText = "Refresh"
+            };
+
             mainControl.toolbar.Items.Add(mainControl.btnSolutions);
+            mainControl.toolbar.Items.Add(toolStripSeparator);
+            mainControl.toolbar.Items.Add(mainControl.btnRefresh);
             mainControl.toolbar.Items.Add(mainControl.lblSelectedSolution);
 
             mainControl.Controls.Add(mainControl.toolbar);

@@ -1,4 +1,5 @@
 ﻿using BulkLookupConfiguration.XrmToolBoxTool.Actions;
+using BulkLookupConfiguration.XrmToolBoxTool.model;
 using BulkLookupConfiguration.XrmToolBoxTool.Services;
 using McTools.Xrm.Connection;
 using Microsoft.Xrm.Sdk;
@@ -18,6 +19,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
         public Panel statusPanel;
         public ToolStrip toolbar;
         public ToolStripButton btnSolutions;
+        public ToolStripButton btnRefresh;
         public ToolStripLabel lblSelectedSolution;
         public Settings mySettings;
         public CheckBox chkDisableNew;
@@ -30,6 +32,9 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
         public DataGridView gridTables;
         public DataGridView gridLookups;
 
+        public Solution selectedSolution = null;
+        public string selectedTableSchemaName = string.Empty;
+
         public BulkLookupConfigurationControl()
         {
             BulkLookupConfigurationLayout.SetupHeader(this);
@@ -40,6 +45,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
 
             btnSolutions.Click += (s, e) => ExecuteMethod(() => SolutionActions.LoadSolutions(this));
             btnSavePublish.Click += (s, e) => ExecuteMethod(() => SolutionActions.SaveAndPublishCustomizations(this, Service));
+            btnRefresh.Click += (s, e) => ExecuteMethod(() => SolutionActions.RefreshMetadata(this, Service));
             gridLookups.SelectionChanged += (s, e) => ExecuteMethod(() => SolutionActions.UpdateConfigPanel(this));
             gridTables.SelectionChanged += (s, e) => ExecuteMethod(() => SolutionActions.OnTargetEntitySelect(this, Service));
             
