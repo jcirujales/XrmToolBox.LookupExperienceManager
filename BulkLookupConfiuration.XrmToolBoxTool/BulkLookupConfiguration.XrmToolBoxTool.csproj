@@ -242,6 +242,7 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Model\CustomColors.cs" />
+    <Compile Include="Model\FormXMLAttributes.cs" />
     <Compile Include="Model\LookupInfo.cs" />
     <Compile Include="Model\Solution.cs" />
     <Compile Include="BulkLookupConfigurationPlugin.cs" />

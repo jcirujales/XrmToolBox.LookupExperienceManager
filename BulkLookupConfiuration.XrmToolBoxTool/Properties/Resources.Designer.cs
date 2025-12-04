@@ -61,12 +61,39 @@ namespace BulkLookupConfiguration.XrmToolBoxTool.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Selected: 0 lookup controls.
+        /// </summary>
+        internal static string DefaultLookupSelectionMessage {
+            get {
+                return ResourceManager.GetString("DefaultLookupSelectionMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Selected Table: No tables selected.
+        /// </summary>
+        internal static string DefaultTableSelectionMessage {
+            get {
+                return ResourceManager.GetString("DefaultTableSelectionMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap Refresh_32 {
             get {
                 object obj = ResourceManager.GetObject("Refresh_32", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Search....
+        /// </summary>
+        internal static string SearchPlaceholderText {
+            get {
+                return ResourceManager.GetString("SearchPlaceholderText", resourceCulture);
             }
         }
         

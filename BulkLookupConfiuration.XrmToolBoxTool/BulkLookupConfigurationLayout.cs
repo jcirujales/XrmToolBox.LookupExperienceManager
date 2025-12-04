@@ -1,4 +1,5 @@
 ﻿using BulkLookupConfiguration.XrmToolBoxTool.Model;
+using BulkLookupConfiguration.XrmToolBoxTool.Properties;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -168,31 +169,31 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
             var disableMRUColumn = new DataGridViewCheckBoxColumn
             {
                 HeaderText = "Disable MRU",
-                Name = "DisableMru",
-                DataPropertyName = "DisableMru",
+                Name = FormXMLAttributes.DisableMru,
+                DataPropertyName = FormXMLAttributes.DisableMru,
                 FillWeight = 20,
                 ReadOnly = true,
             };
             var isInlineEditableColumn = new DataGridViewCheckBoxColumn
             {
                 HeaderText = "+ New",
-                Name = "IsInlineNewEnabled",
-                DataPropertyName = "IsInlineNewEnabled",
+                Name = FormXMLAttributes.IsInlineNewEnabled,
+                DataPropertyName = FormXMLAttributes.IsInlineNewEnabled,
                 FillWeight = 20,
                 ReadOnly = true,
             };
             var isMainFormCreateEnabledColumn = new DataGridViewCheckBoxColumn
             {
                 HeaderText = "Main Form (Create)",
-                Name = "useMainFormDialogForCreate",
-                DataPropertyName = "useMainFormDialogForCreate",
+                Name = FormXMLAttributes.UseMainFormDialogForCreate,
+                DataPropertyName = FormXMLAttributes.UseMainFormDialogForCreate,
                 FillWeight = 20
             };
             var isMainFormEditEnabledColumn = new DataGridViewCheckBoxColumn
             {
                 HeaderText = "Main Form (Edit)",
-                Name = "useMainFormDialogForEdit",
-                DataPropertyName = "useMainFormDialogForEdit",
+                Name = FormXMLAttributes.UseMainFormDialogForEdit,
+                DataPropertyName = FormXMLAttributes.UseMainFormDialogForEdit,
                 FillWeight = 20
             };
             mainControl.gridLookups.Columns.AddRange(new DataGridViewColumn[]
@@ -250,7 +251,6 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
             var content = new FlowLayoutPanel
             {
                 Dock = DockStyle.Fill,
-                // Padding = new Padding(1),
                 FlowDirection = FlowDirection.TopDown,
                 AutoSize = true,
                 WrapContents = false
@@ -258,7 +258,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
 
             mainControl.lblConfigMessage = new Label
             {
-                Text = "Selected: 0 lookup controls",
+                Text = Resources.DefaultLookupSelectionMessage,
                 ForeColor = Color.FromArgb(180, 180, 255),
                 Font = new Font("Segoe UI", 10F, FontStyle.Bold),
                 AutoSize = true,
@@ -416,7 +416,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
         {
             mainControl.selectedTable = new TextBox
             {
-                Text = "Selected Table: No tables selected.",
+                Text = Resources.DefaultTableSelectionMessage,
                 ReadOnly = true,
                 Dock = DockStyle.Top,
                 Height = 36,
@@ -439,7 +439,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
         {
             mainControl.searchBox = new TextBox
             {
-                Text = "Search...",
+                Text = Resources.SearchPlaceholderText,
                 Dock = DockStyle.Top,
                 Height = 36,
                 Margin = new Padding(12, 12, 12, 0),
@@ -453,7 +453,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
             // Placeholder color
             mainControl.searchBox.GotFocus += (s, e) =>
             {
-                if (mainControl.searchBox.Text == "Search...") mainControl.searchBox.Text = "";
+                if (mainControl.searchBox.Text == Resources.SearchPlaceholderText) mainControl.searchBox.Text = "";
                 mainControl.searchBox.ForeColor = Color.White;
             };
             mainControl.searchBox.LostFocus += (s, e) =>
@@ -475,7 +475,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
                 try
                 {
                     var term = mainControl.searchBox.Text.ToLower().Trim();
-                    if (string.IsNullOrEmpty(term) || term == "search...")
+                    if (string.IsNullOrEmpty(term) || term == Resources.SearchPlaceholderText.ToLower())
                     {
                         grid.DataSource = initialRecordSet;
                     }

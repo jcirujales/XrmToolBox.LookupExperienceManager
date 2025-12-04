@@ -1,5 +1,6 @@
 ﻿using BulkLookupConfiguration.XrmToolBoxTool.forms;
 using BulkLookupConfiguration.XrmToolBoxTool.Model;
+using BulkLookupConfiguration.XrmToolBoxTool.Properties;
 using BulkLookupConfiguration.XrmToolBoxTool.Services;
 using Microsoft.Crm.Sdk.Messages;
 using Microsoft.Xrm.Sdk;
@@ -27,7 +28,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool.Actions
             {
                 mainControl.gridLookups.DataSource = null;
                 UpdateConfigPanel(mainControl);
-                mainControl.selectedTable.Text = "Selected Table: No tables selected.";
+                mainControl.selectedTable.Text = Resources.DefaultTableSelectionMessage;
                 return;
             }
 
@@ -147,7 +148,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool.Actions
                         schemaName = entity.LogicalName
                     }).ToList();
 
-                    if(mainControl.searchBox.Text.ToLower().Trim() != "search...") mainControl.searchBox.Clear();
+                    if(mainControl.searchBox.Text.ToLower().Trim() != Resources.SearchPlaceholderText.ToLower()) mainControl.searchBox.Clear();
 
                     mainControl.gridTables.Tag = tables.Cast<object>().ToList(); // store original loaded tables
                     mainControl.gridTables.DataSource = tables;
@@ -168,7 +169,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool.Actions
             if (selected.Count == 0)
             {
                 mainControl.gridLookups.ClearSelection();
-                mainControl.lblConfigMessage.Text = "Selected: 0 lookup controls";
+                mainControl.lblConfigMessage.Text = Resources.DefaultLookupSelectionMessage;
                 mainControl.chkDisableNew.Enabled = false;
                 mainControl.chkDisableMru.Enabled = false;
                 mainControl.chkMainFormCreate.Enabled = false;
@@ -186,10 +187,10 @@ namespace BulkLookupConfiguration.XrmToolBoxTool.Actions
             mainControl.btnSavePublish.Visible = true;
             mainControl.btnSavePublish.Text = $"Save and Publish ({selected.Count})";
 
-            SetTriStateCheckBox(mainControl.chkDisableNew, selected, "IsInlineNewEnabled");
-            SetTriStateCheckBox(mainControl.chkDisableMru, selected, "DisableMru");
-            SetTriStateCheckBox(mainControl.chkMainFormCreate, selected, "UseMainFormDialogForCreate");
-            SetTriStateCheckBox(mainControl.chkMainFormEdit, selected, "UseMainFormDialogForEdit");
+            SetTriStateCheckBox(mainControl.chkDisableNew, selected, FormXMLAttributes.IsInlineNewEnabled);
+            SetTriStateCheckBox(mainControl.chkDisableMru, selected, FormXMLAttributes.DisableMru);
+            SetTriStateCheckBox(mainControl.chkMainFormCreate, selected, FormXMLAttributes.UseMainFormDialogForCreate);
+            SetTriStateCheckBox(mainControl.chkMainFormEdit, selected, FormXMLAttributes.UseMainFormDialogForEdit);
         }
 
         private static void SetTriStateCheckBox(CheckBox checkBox, List<DataGridViewRow> selectedRows, string columnName)
@@ -349,10 +350,10 @@ namespace BulkLookupConfiguration.XrmToolBoxTool.Actions
 
                 var settings = new[]
                     {
-                        ("IsInlineNewEnabled", isInlineNewEnabled),
-                        ("DisableMru", disableMru),
-                        ("useMainFormDialogForCreate", mainFormCreate),
-                        ("useMainFormDialogForEdit", mainFormEdit)
+                        (FormXMLAttributes.IsInlineNewEnabled, isInlineNewEnabled),
+                        (FormXMLAttributes.DisableMru, disableMru),
+                        (FormXMLAttributes.UseMainFormDialogForCreate, mainFormCreate),
+                        (FormXMLAttributes.UseMainFormDialogForEdit, mainFormEdit)
                     };
                 foreach (var (name, state) in settings)
                 {
