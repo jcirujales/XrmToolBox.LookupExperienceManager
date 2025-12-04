@@ -96,9 +96,9 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
                 BackColor = Color.FromArgb(40, 44, 52)
             };
 
-            mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
-            mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
-            mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
+            mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
+            mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 60F));
+            mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
 
             // LEFT: Target Entity
             var panelTables = CreateModernPanel("Tables", "Select a lookup table to see all of its related lookup controls.");
@@ -277,7 +277,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
 
             mainControl.chkDisableMru = new CheckBox
             {
-                Text = "Hide Recently Used (MRU)",
+                Text = "Disable Recently Used (MRU)",
                 ForeColor = Color.White,
                 Font = new Font("Segoe UI", 10F),
                 AutoSize = true,
@@ -356,9 +356,9 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
                 {
                     BackColor = Color.FromArgb(62, 68, 82),
                     ForeColor = Color.White,
-                    Font = new Font("Segoe UI", 9.5F, FontStyle.Bold),
+                    Font = new Font("Segoe UI", 8.5F, FontStyle.Bold),
                     Alignment = DataGridViewContentAlignment.MiddleLeft,
-                    Padding = new Padding(12, 0, 0, 0)
+                    Padding = new Padding(2, 0, 0, 0)
                 },
                 DefaultCellStyle = new DataGridViewCellStyle
                 {
@@ -366,7 +366,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
                     ForeColor = Color.White,
                     SelectionBackColor = Color.FromArgb(0, 122, 204),
                     SelectionForeColor = Color.White,
-                    Padding = new Padding(12, 0, 0, 0)
+                    Padding = new Padding(2, 0, 0, 0)
                 },
                 AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill
             };
