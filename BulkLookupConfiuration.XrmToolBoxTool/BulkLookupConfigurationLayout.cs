@@ -61,11 +61,11 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
 
             var toolStripSeparator = new ToolStripSeparator();
 
-            mainControl.btnRefresh = new ToolStripButton("Refresh")
+            mainControl.btnRefresh = new ToolStripButton("Refresh Metadata")
             {
-                //Image = Properties.Resources.Solutions_32,
+                Image = Properties.Resources.Refresh_32,
                 ImageScaling = ToolStripItemImageScaling.None,
-                ToolTipText = "Refresh"
+                ToolTipText = "Refresh Metadata"
             };
 
             mainControl.toolbar.Items.Add(mainControl.btnSolutions);
