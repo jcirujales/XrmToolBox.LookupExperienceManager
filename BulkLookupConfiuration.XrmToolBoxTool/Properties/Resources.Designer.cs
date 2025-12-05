@@ -90,6 +90,26 @@ namespace BulkLookupConfiguration.XrmToolBoxTool.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap heartlookup_32_nobg {
+            get {
+                object obj = ResourceManager.GetObject("heartlookup_32_nobg", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] heartlookup_32_nobg_icon {
+            get {
+                object obj = ResourceManager.GetObject("heartlookup_32_nobg_icon", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Refresh_32 {
             get {
                 object obj = ResourceManager.GetObject("Refresh_32", resourceCulture);

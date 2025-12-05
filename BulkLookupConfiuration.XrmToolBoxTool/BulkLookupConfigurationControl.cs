@@ -1,10 +1,11 @@
 ﻿using BulkLookupConfiguration.XrmToolBoxTool.Actions;
 using BulkLookupConfiguration.XrmToolBoxTool.model;
-using BulkLookupConfiguration.XrmToolBoxTool.Services;
+using BulkLookupConfiguration.XrmToolBoxTool.Properties;
 using McTools.Xrm.Connection;
 using Microsoft.Xrm.Sdk;
 using System;
-using System.Web.Services.Description;
+using System.Drawing;
+using System.IO;
 using System.Windows.Forms;
 using XrmToolBox.Extensibility;
 using Label = System.Windows.Forms.Label;
@@ -38,6 +39,9 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
 
         public BulkLookupConfigurationControl()
         {
+            this.PluginIcon = new Icon(new MemoryStream(Resources.heartlookup_32_nobg_icon));
+            this.TabIcon = Resources.heartlookup_32_nobg;
+
             BulkLookupConfigurationLayout.SetupHeader(this);
             BulkLookupConfigurationLayout.SetupModernLayout(this);
 
@@ -78,6 +82,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
         private void BulkLookupConfigurationControl_Load(object sender, EventArgs e)
         {
             LoadSettings();
+
         }
         private void LoadSettings()
         {
@@ -111,6 +116,19 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
         private void GridTables_SelectionChanged()
         {
             SolutionActions.OnTargetEntitySelect(this, Service);
+        }
+
+        private void InitializeComponent()
+        {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(BulkLookupConfigurationControl));
+            this.SuspendLayout();
+            // 
+            // BulkLookupConfigurationControl
+            // 
+            this.Name = "BulkLookupConfigurationControl";
+            this.PluginIcon = ((System.Drawing.Icon)(resources.GetObject("$this.PluginIcon")));
+            this.ResumeLayout(false);
+
         }
     }
 }
