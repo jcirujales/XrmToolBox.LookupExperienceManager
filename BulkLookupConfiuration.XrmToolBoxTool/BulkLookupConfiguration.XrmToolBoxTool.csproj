@@ -8,8 +8,8 @@
     <ProjectGuid>{B328DFF0-65F5-406C-8B6A-9223B4AD84A7}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>BulkLookupConfiuration.XrmToolBoxTool</RootNamespace>
-    <AssemblyName>BulkLookupConfiuration.XrmToolBoxTool</AssemblyName>
+    <RootNamespace>BulkLookupConfiguration.XrmToolBoxTool</RootNamespace>
+    <AssemblyName>BulkLookupConfiguration.XrmToolBoxTool</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <NuGetPackageImportStamp>
@@ -199,9 +199,6 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="Microsoft.VisualStudio.CoreUtility">
-      <Private>False</Private>
-    </Reference>
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Activities" />
@@ -239,19 +236,46 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MyPlugin.cs" />
-    <Compile Include="MyPluginControl.cs">
+    <Compile Include="Actions\SolutionActions.cs" />
+    <Compile Include="BulkLookupConfigurationLayout.cs" />
+    <Compile Include="Forms\SolutionPicker.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Model\CustomColors.cs" />
+    <Compile Include="Model\FormXMLAttributes.cs" />
+    <Compile Include="Model\LookupInfo.cs" />
+    <Compile Include="Model\Solution.cs" />
+    <Compile Include="BulkLookupConfigurationPlugin.cs" />
+    <Compile Include="BulkLookupConfigurationControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="MyPluginControl.designer.cs">
-      <DependentUpon>MyPluginControl.cs</DependentUpon>
-    </Compile>
+    <Compile Include="Model\Table.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Services\DataverseService.cs" />
     <Compile Include="Settings.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="BulkLookupConfigurationControl.resx">
+      <DependentUpon>BulkLookupConfigurationControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <Content Include="Images\Refresh_32.png" />
+    <Content Include="Images\Solutions_32.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
