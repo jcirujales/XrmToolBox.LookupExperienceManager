@@ -33,7 +33,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
                 Padding = new Padding(0, 8, 0, 0)
             };
 
-            mainControl.lblSelectedSolution = new ToolStripLabel("No solution selected")
+            mainControl.lblSelectedSolution = new ToolStripLabel(Resources.DefaultSolutionMessage)
              {
                  ForeColor = Color.FromArgb(180, 200, 255),
                  Font = new Font("Segoe UI", 10F),
@@ -83,7 +83,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
             mainControl.gridTables.DataSource = null;
             mainControl.gridLookups.ClearSelection();
             mainControl.gridLookups.DataSource = null;
-            mainControl.lblSelectedSolution.Text = "No solution selected";
+            mainControl.lblSelectedSolution.Text = Resources.DefaultSolutionMessage;
             mainControl.lblSelectedSolution.ForeColor = Color.FromArgb(180, 200, 255);
         }
         public static void SetupModernLayout(BulkLookupConfigurationControl mainControl)
@@ -287,7 +287,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
 
             mainControl.chkMainFormCreate = new CheckBox
             {
-                Text = "Use main form dialog for Create",
+                Text = "Use Main Form Dialog for Create",
                 ForeColor = Color.White,
                 Font = new Font("Segoe UI", 10F),
                 AutoSize = true,
@@ -297,7 +297,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
 
             mainControl.chkMainFormEdit = new CheckBox
             {
-                Text = "Use main form dialog for Edit",
+                Text = "Use Main Form Dialog for Edit",
                 ForeColor = Color.White,
                 Font = new Font("Segoe UI", 10F),
                 AutoSize = true,
@@ -458,14 +458,11 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
             };
             mainControl.searchBox.LostFocus += (s, e) =>
             {
-
                 mainControl.searchBox.ForeColor = Color.FromArgb(180, 180, 180);
-
             };
 
             List<object> originalData = new List<object>();
 
-            // Search logic — perfect
             mainControl.searchBox.TextChanged += (s, e) =>
             {
                 if (mainControl.isSystemUpdate) return;

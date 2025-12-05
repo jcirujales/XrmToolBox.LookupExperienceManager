@@ -120,6 +120,9 @@
   <data name="DefaultLookupSelectionMessage" xml:space="preserve">
     <value>Selected: 0 lookup controls</value>
   </data>
+  <data name="DefaultSolutionMessage" xml:space="preserve">
+    <value>No solution selected</value>
+  </data>
   <data name="DefaultTableSelectionMessage" xml:space="preserve">
     <value>Selected Table: No tables selected</value>
   </data>

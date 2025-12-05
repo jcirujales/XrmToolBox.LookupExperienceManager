@@ -70,6 +70,15 @@ namespace BulkLookupConfiguration.XrmToolBoxTool.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No solution selected.
+        /// </summary>
+        internal static string DefaultSolutionMessage {
+            get {
+                return ResourceManager.GetString("DefaultSolutionMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Selected Table: No tables selected.
         /// </summary>
         internal static string DefaultTableSelectionMessage {
