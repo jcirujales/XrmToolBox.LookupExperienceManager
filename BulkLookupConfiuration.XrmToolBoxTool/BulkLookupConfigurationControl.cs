@@ -4,6 +4,7 @@ using BulkLookupConfiguration.XrmToolBoxTool.Services;
 using McTools.Xrm.Connection;
 using Microsoft.Xrm.Sdk;
 using System;
+using System.Web.Services.Description;
 using System.Windows.Forms;
 using XrmToolBox.Extensibility;
 using Label = System.Windows.Forms.Label;
@@ -43,11 +44,11 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
             this.Load += BulkLookupConfigurationControl_Load;
             this.OnCloseTool += BulkLookupConfigurationControl_OnCloseTool;
 
-            btnSolutions.Click += (s, e) => ExecuteMethod(() => SolutionActions.LoadSolutions(this));
-            btnSavePublish.Click += (s, e) => ExecuteMethod(() => SolutionActions.SaveAndPublishCustomizations(this, Service));
-            btnRefresh.Click += (s, e) => ExecuteMethod(() => SolutionActions.RefreshMetadata(this, Service));
-            gridLookups.SelectionChanged += (s, e) => ExecuteMethod(() => SolutionActions.UpdateConfigPanel(this));
-            gridTables.SelectionChanged += (s, e) => ExecuteMethod(() => SolutionActions.OnTargetEntitySelect(this, Service));
+            btnSolutions.Click += (s, e) => ExecuteMethod(LoadSolutions_Click);
+            btnSavePublish.Click += (s, e) => ExecuteMethod(SaveAndPublish_Click);
+            btnRefresh.Click += (s, e) => ExecuteMethod(Refresh_Click);
+            gridLookups.SelectionChanged += (s, e) => ExecuteMethod(GridLookup_SelectionChanged);
+            gridTables.SelectionChanged += (s, e) => ExecuteMethod(GridTables_SelectionChanged);
             
         }
         /// <summary>
@@ -77,7 +78,6 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
         private void BulkLookupConfigurationControl_Load(object sender, EventArgs e)
         {
             LoadSettings();
-            ExecuteMethod(() => DataverseService.WhoAmI(Service));
         }
         private void LoadSettings()
         {
@@ -90,6 +90,27 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
             {
                 LogInfo("Settings loaded successfully");
             }
+        }
+
+        private void LoadSolutions_Click()
+        {
+            SolutionActions.LoadSolutions(this);
+        }
+        private void SaveAndPublish_Click()
+        {
+            SolutionActions.SaveAndPublishCustomizations(this, Service);
+        }
+        private void Refresh_Click()
+        {
+            SolutionActions.RefreshMetadata(this, Service);
+        }
+        private void GridLookup_SelectionChanged()
+        {
+            SolutionActions.UpdateConfigPanel(this);
+        }
+        private void GridTables_SelectionChanged()
+        {
+            SolutionActions.OnTargetEntitySelect(this, Service);
         }
     }
 }
