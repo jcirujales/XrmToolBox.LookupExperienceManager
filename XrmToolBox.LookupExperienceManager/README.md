@@ -12,7 +12,7 @@ On lookup controls, instead of manually disabling "+ New", hiding MRU, or updati
 
 This plugin does it **all at once**.
 
-![Screenshot](Images/screenshot.png)
+![alt text](https://github.com/jcirujales/XrmToolBox.LookupExperienceManager/blob/master/BulkLookupConfiuration.XrmToolBoxTool/Images/LookupExperienceManager_Screenshot.png)
 
 ### Features
 

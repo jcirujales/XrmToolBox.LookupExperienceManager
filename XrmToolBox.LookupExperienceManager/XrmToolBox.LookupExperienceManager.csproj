@@ -279,6 +279,7 @@
     <Content Include="Images\heartlookup_32_nobg.ico" />
     <Content Include="Images\heartlookup_32_nobg.png" />
     <Content Include="Images\heartlookup_80_nobg.png" />
+    <Content Include="Images\LookupExperienceManager_Screenshot.png" />
     <Content Include="Images\Refresh_32.png" />
     <Content Include="Images\Solutions_32.png" />
   </ItemGroup>
