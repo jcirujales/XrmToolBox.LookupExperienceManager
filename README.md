@@ -11,8 +11,7 @@ The Lookup Experience Manager allows the following configurations to be bulk upd
 On lookup controls, instead of manually disabling "+ New", hiding MRU, or updating main form dialogs on batches of lookup fields.
 
 This plugin does it **all at once**.
-
-![image]([https://github.com/jcirujales/XrmToolBox.LookupExperienceManager/blob/master/BulkLookupConfiuration.XrmToolBoxTool/Images/LookupExperienceManager_Screenshot.png](https://github.com/jcirujales/XrmToolBox.LookupExperienceManager/blob/master/XrmToolBox.LookupExperienceManager/Images/LookupExperienceManager_Screenshot.png))
+<img width="1629" height="604" alt="image" src="https://github.com/user-attachments/assets/26952220-9a87-4b86-af08-6e9b50c2c45d" />
 
 ### Features
 
