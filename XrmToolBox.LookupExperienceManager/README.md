@@ -2,7 +2,13 @@
 
 **Bulk configure lookup control behavior across ALL forms in a solution — in seconds.**
 
-Tired of manually disabling "+ New", hiding MRU, or forcing main form dialogs on batches of lookup fields?
+The Lookup Experience Manager allows the following configurations to be bulk updated for lookup controls without modifying the formxml directly or needing to navigate to each form a control lives on to make the update:
+- Inline New Button
+- Most Recently Used items
+- Main Form Create 
+- Main Form Edit 
+
+On lookup controls, instead of manually disabling "+ New", hiding MRU, or updating main form dialogs on batches of lookup fields.
 
 This plugin does it **all at once**.
 
@@ -16,14 +22,15 @@ This plugin does it **all at once**.
   - **Show/Hide Recently Used (MRU)**
   - **Use Main Form dialog for Create**
   - **Use Main Form dialog for Edit**
-- Smart **tri-state checkboxes** (Checked / Unchecked / Mixed)
+- Smart **tri-state checkboxes** (Checked / Unchecked / Mixed - if multiple lookups are selected with different configurations)
 - Applies changes to **all relevant forms** automatically
 - One-click **Save & Publish** (only affected entities)
 - Full **refresh** support — reload metadata anytime
-- Beautiful dark theme matching Power Platform
-- Lightning-fast with zero N+1 queries
+- Dark theme UI
+
 
 ### Why You Need This
+Most of the time when a lookup needs to be modified, lookups of the same type most likely need the same updates. It can be cumbersome to find those lookups, the forms they live on, and then have to navigate to each one to make the update. Also needing to find the control on the large forms takes time. For removing the inline New button, the formxml needs to be manually updated and would require the developer to reference API documentation to recall IsInlineNewButton in addition to the steps mentioned prior. 
 
 | Problem                                                | Solved? |
 |--------------------------------------------------------|---------|
@@ -35,9 +42,9 @@ This plugin does it **all at once**.
 
 ### Installation
 
-1. Download the latest release
-2. Extract to your XrmToolBox `Plugins` folder
-3. Restart XrmToolBox
+1. Open XrmToolBox > Configuration > Tool Library
+2. Search for Lookup Experience Manager
+3. Select it and click Install
 
 ### Usage
 
