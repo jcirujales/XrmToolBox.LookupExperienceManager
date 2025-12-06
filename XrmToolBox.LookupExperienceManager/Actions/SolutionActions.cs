@@ -1,7 +1,7 @@
-﻿using BulkLookupConfiguration.XrmToolBoxTool.forms;
-using BulkLookupConfiguration.XrmToolBoxTool.Model;
-using BulkLookupConfiguration.XrmToolBoxTool.Properties;
-using BulkLookupConfiguration.XrmToolBoxTool.Services;
+﻿using XrmToolBox.LookupExperienceManager.forms;
+using XrmToolBox.LookupExperienceManager.Model;
+using XrmToolBox.LookupExperienceManager.Properties;
+using XrmToolBox.LookupExperienceManager.Services;
 using Microsoft.Crm.Sdk.Messages;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Metadata;
@@ -12,14 +12,14 @@ using System.Linq;
 using System.Windows.Forms;
 using System.Xml.Linq;
 using XrmToolBox.Extensibility;
-using Solution = BulkLookupConfiguration.XrmToolBoxTool.model.Solution;
+using Solution = XrmToolBox.LookupExperienceManager.model.Solution;
 
-namespace BulkLookupConfiguration.XrmToolBoxTool.Actions
+namespace XrmToolBox.LookupExperienceManager.Actions
 {
     public static class SolutionActions
     {
         public static void OnTargetEntitySelect(
-            BulkLookupConfigurationControl mainControl,
+            LookupExperienceManagerControl mainControl,
             IOrganizationService orgService)
         {
             if (mainControl.isSystemUpdate) return; 
@@ -41,7 +41,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool.Actions
             LoadReverseLookupsUsingOneToMany(mainControl, logicalName, orgService);
         }
         private static void LoadReverseLookupsUsingOneToMany(
-            BulkLookupConfigurationControl mainControl,
+            LookupExperienceManagerControl mainControl,
             string targetEntityLogicalName,
             IOrganizationService orgService)
         {
@@ -98,7 +98,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool.Actions
                 }
             });
         }
-        public static void RefreshMetadata(BulkLookupConfigurationControl mainControl, IOrganizationService orgService)
+        public static void RefreshMetadata(LookupExperienceManagerControl mainControl, IOrganizationService orgService)
         {
             if (mainControl.selectedSolution != null)
             {
@@ -126,7 +126,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool.Actions
                 }
             }
         }
-        public static void OnSolutionSelected(BulkLookupConfigurationControl mainControl, Solution selectedSolution)
+        public static void OnSolutionSelected(LookupExperienceManagerControl mainControl, Solution selectedSolution)
         {
             var solutionName = selectedSolution.FriendlyName ?? selectedSolution.UniqueName;
             var version = selectedSolution.Version ?? "?.?.?";
@@ -160,7 +160,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool.Actions
                 }));
             });
         }
-        public static void UpdateConfigPanel(BulkLookupConfigurationControl mainControl)
+        public static void UpdateConfigPanel(LookupExperienceManagerControl mainControl)
         {
             if (mainControl.isSystemUpdate) return;
 
@@ -205,7 +205,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool.Actions
                 checkBox.CheckState = CheckState.Unchecked;
         }
         public static void LoadEntitiesFromSolution(
-            BulkLookupConfigurationControl mainControl,
+            LookupExperienceManagerControl mainControl,
             Solution selectedSolution,
             Action<List<EntityMetadata>> onComplete)
         {
@@ -246,7 +246,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool.Actions
                 }
             });
         }
-        public static void SaveAndPublishCustomizations(BulkLookupConfigurationControl mainControl, IOrganizationService orgService)
+        public static void SaveAndPublishCustomizations(LookupExperienceManagerControl mainControl, IOrganizationService orgService)
         {
             var selectedRows = mainControl.gridLookups.SelectedRows.Cast<DataGridViewRow>().ToList();
             if (selectedRows.Count == 0)
@@ -379,7 +379,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool.Actions
                 param.Value = value.ToString().ToLower();
             }
         }
-        public static void LoadSolutions(BulkLookupConfigurationControl mainControl)
+        public static void LoadSolutions(LookupExperienceManagerControl mainControl)
         {
             mainControl.WorkAsync(new WorkAsyncInfo
             {
@@ -416,7 +416,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool.Actions
             });
         }
 
-        private static void ShowSolutions(BulkLookupConfigurationControl mainControl, List<Solution> solutions)
+        private static void ShowSolutions(LookupExperienceManagerControl mainControl, List<Solution> solutions)
         {
             mainControl.BeginInvoke((MethodInvoker)(() =>
             {

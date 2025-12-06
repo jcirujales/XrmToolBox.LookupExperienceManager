@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BulkLookupConfiguration.XrmToolBoxTool.Model
+namespace XrmToolBox.LookupExperienceManager.Model
 {
     public class LookupInfo
     {

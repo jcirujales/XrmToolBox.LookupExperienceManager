@@ -1,16 +1,16 @@
-﻿using BulkLookupConfiguration.XrmToolBoxTool.Model;
-using BulkLookupConfiguration.XrmToolBoxTool.Properties;
+﻿using XrmToolBox.LookupExperienceManager.Model;
+using XrmToolBox.LookupExperienceManager.Properties;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 
-namespace BulkLookupConfiguration.XrmToolBoxTool
+namespace XrmToolBox.LookupExperienceManager
 {
-    public static class BulkLookupConfigurationLayout
+    public static class LookupExperienceManagerLayout
     {
-        public static void SetupHeader(BulkLookupConfigurationControl mainControl)
+        public static void SetupHeader(LookupExperienceManagerControl mainControl)
         {
             mainControl.Dock = DockStyle.Fill;
             mainControl.Margin = new Padding(0);
@@ -77,7 +77,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
             mainControl.Controls.Add(mainControl.toolbar);
             mainControl.Controls.Add(mainControl.statusPanel);
         }
-        public static void ClearGridsAndSelections(BulkLookupConfigurationControl mainControl)
+        public static void ClearGridsAndSelections(LookupExperienceManagerControl mainControl)
         {
             mainControl.gridTables.ClearSelection();
             mainControl.gridTables.DataSource = null;
@@ -86,7 +86,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
             mainControl.lblSelectedSolution.Text = Resources.DefaultSolutionMessage;
             mainControl.lblSelectedSolution.ForeColor = Color.FromArgb(180, 200, 255);
         }
-        public static void SetupModernLayout(BulkLookupConfigurationControl mainControl)
+        public static void SetupModernLayout(LookupExperienceManagerControl mainControl)
         {
             var mainLayout = new TableLayoutPanel
             {
@@ -412,7 +412,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
 
             return panel;
         }
-        private static void SetSelectedTable(BulkLookupConfigurationControl mainControl, DataGridView grid, Panel panel)
+        private static void SetSelectedTable(LookupExperienceManagerControl mainControl, DataGridView grid, Panel panel)
         {
             mainControl.selectedTable = new TextBox
             {
@@ -435,7 +435,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
             panel.Controls.Add(mainControl.selectedTable);
             panel.Controls.SetChildIndex(mainControl.selectedTable, 0);
         }
-        private static void SetSearchBox(BulkLookupConfigurationControl mainControl, DataGridView grid, Panel panel, params string[] searchColumns)
+        private static void SetSearchBox(LookupExperienceManagerControl mainControl, DataGridView grid, Panel panel, params string[] searchColumns)
         {
             mainControl.searchBox = new TextBox
             {
