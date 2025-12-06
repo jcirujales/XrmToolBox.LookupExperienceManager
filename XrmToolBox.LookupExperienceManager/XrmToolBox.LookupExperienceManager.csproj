@@ -8,8 +8,8 @@
     <ProjectGuid>{B328DFF0-65F5-406C-8B6A-9223B4AD84A7}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>BulkLookupConfiguration.XrmToolBoxTool</RootNamespace>
-    <AssemblyName>BulkLookupConfiguration.XrmToolBoxTool</AssemblyName>
+    <RootNamespace>XrmToolBox.LookupExperienceManager</RootNamespace>
+    <AssemblyName>XrmToolBox.LookupExperienceManager</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <NuGetPackageImportStamp>
@@ -237,7 +237,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Actions\SolutionActions.cs" />
-    <Compile Include="BulkLookupConfigurationLayout.cs" />
+    <Compile Include="LookupExperienceManagerLayout.cs" />
     <Compile Include="Forms\SolutionPicker.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -245,8 +245,8 @@
     <Compile Include="Model\FormXMLAttributes.cs" />
     <Compile Include="Model\LookupInfo.cs" />
     <Compile Include="Model\Solution.cs" />
-    <Compile Include="BulkLookupConfigurationPlugin.cs" />
-    <Compile Include="BulkLookupConfigurationControl.cs">
+    <Compile Include="LookupExperienceManagerPlugin.cs" />
+    <Compile Include="LookupExperienceManagerControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Model\Table.cs" />
@@ -266,8 +266,8 @@
     <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="BulkLookupConfigurationControl.resx">
-      <DependentUpon>BulkLookupConfigurationControl.cs</DependentUpon>
+    <EmbeddedResource Include="LookupExperienceManagerControl.resx">
+      <DependentUpon>LookupExperienceManagerControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

@@ -1,9 +1,9 @@
-﻿using BulkLookupConfiguration.XrmToolBoxTool.model;
+﻿using XrmToolBox.LookupExperienceManager.model;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace BulkLookupConfiguration.XrmToolBoxTool.forms
+namespace XrmToolBox.LookupExperienceManager.forms
 {
     public partial class SolutionPicker : Form
     {

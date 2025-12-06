@@ -1,7 +1,7 @@
 ﻿using System.Drawing;
 using System.Windows.Forms;
 
-namespace BulkLookupConfiguration.XrmToolBoxTool.Model
+namespace XrmToolBox.LookupExperienceManager.Model
 {
     public class CustomColors: ProfessionalColorTable
     {

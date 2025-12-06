@@ -1,6 +1,6 @@
-﻿using BulkLookupConfiguration.XrmToolBoxTool.Actions;
-using BulkLookupConfiguration.XrmToolBoxTool.model;
-using BulkLookupConfiguration.XrmToolBoxTool.Properties;
+﻿using XrmToolBox.LookupExperienceManager.Actions;
+using XrmToolBox.LookupExperienceManager.model;
+using XrmToolBox.LookupExperienceManager.Properties;
 using McTools.Xrm.Connection;
 using Microsoft.Xrm.Sdk;
 using System;
@@ -10,9 +10,9 @@ using System.Windows.Forms;
 using XrmToolBox.Extensibility;
 using Label = System.Windows.Forms.Label;
 
-namespace BulkLookupConfiguration.XrmToolBoxTool
+namespace XrmToolBox.LookupExperienceManager
 {
-    public partial class BulkLookupConfigurationControl : PluginControlBase
+    public partial class LookupExperienceManagerControl : PluginControlBase
     {
         public bool isSystemUpdate = true;
 
@@ -37,16 +37,16 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
         public Solution selectedSolution = null;
         public string selectedTableSchemaName = string.Empty;
 
-        public BulkLookupConfigurationControl()
+        public LookupExperienceManagerControl()
         {
             this.PluginIcon = new Icon(new MemoryStream(Resources.heartlookup_32_nobg_icon));
             this.TabIcon = Resources.heartlookup_32_nobg;
 
-            BulkLookupConfigurationLayout.SetupHeader(this);
-            BulkLookupConfigurationLayout.SetupModernLayout(this);
+            LookupExperienceManagerLayout.SetupHeader(this);
+            LookupExperienceManagerLayout.SetupModernLayout(this);
 
-            this.Load += BulkLookupConfigurationControl_Load;
-            this.OnCloseTool += BulkLookupConfigurationControl_OnCloseTool;
+            this.Load += LookupExperienceManagerControl_Load;
+            this.OnCloseTool += LookupExperienceManagerControl_OnCloseTool;
 
             btnSolutions.Click += (s, e) => ExecuteMethod(LoadSolutions_Click);
             btnSavePublish.Click += (s, e) => ExecuteMethod(SaveAndPublish_Click);
@@ -60,7 +60,7 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void BulkLookupConfigurationControl_OnCloseTool(object sender, EventArgs e)
+        private void LookupExperienceManagerControl_OnCloseTool(object sender, EventArgs e)
         {
             // Before leaving, save the settings
             SettingsManager.Instance.Save(GetType(), mySettings);
@@ -72,14 +72,14 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
         public override void UpdateConnection(IOrganizationService newService, ConnectionDetail detail, string actionName, object parameter)
         {
             base.UpdateConnection(newService, detail, actionName, parameter);
-            BulkLookupConfigurationLayout.ClearGridsAndSelections(this);
+            LookupExperienceManagerLayout.ClearGridsAndSelections(this);
             if (mySettings != null && detail != null)
             {
                 mySettings.LastUsedOrganizationWebappUrl = detail.WebApplicationUrl;
                 LogInfo("Connection updated to: {0}", detail.WebApplicationUrl);
             }
         }
-        private void BulkLookupConfigurationControl_Load(object sender, EventArgs e)
+        private void LookupExperienceManagerControl_Load(object sender, EventArgs e)
         {
             LoadSettings();
 
@@ -120,12 +120,9 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
 
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(BulkLookupConfigurationControl));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(LookupExperienceManagerControl));
             this.SuspendLayout();
-            // 
-            // BulkLookupConfigurationControl
-            // 
-            this.Name = "BulkLookupConfigurationControl";
+            this.Name = "LookupExperienceManagerControl";
             this.PluginIcon = ((System.Drawing.Icon)(resources.GetObject("$this.PluginIcon")));
             this.ResumeLayout(false);
 

@@ -1,4 +1,4 @@
-﻿using BulkLookupConfiguration.XrmToolBoxTool.Model;
+﻿using XrmToolBox.LookupExperienceManager.Model;
 using Microsoft.Crm.Sdk.Messages;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Messages;
@@ -10,7 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 
-namespace BulkLookupConfiguration.XrmToolBoxTool.Services
+namespace XrmToolBox.LookupExperienceManager.Services
 {
     public static class DataverseService
     {

@@ -2,7 +2,7 @@
 using Microsoft.Xrm.Sdk.Client;
 using System;
 
-namespace BulkLookupConfiguration.XrmToolBoxTool.model
+namespace XrmToolBox.LookupExperienceManager.model
 {
     // SolutionRecord.cs
     [EntityLogicalName("solution")]

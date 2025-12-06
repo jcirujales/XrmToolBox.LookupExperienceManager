@@ -7,14 +7,14 @@ using System.Reflection;
 using XrmToolBox.Extensibility;
 using XrmToolBox.Extensibility.Interfaces;
 
-namespace BulkLookupConfiguration.XrmToolBoxTool
+namespace XrmToolBox.LookupExperienceManager
 {
     // Do not forget to update version number and author (company attribute) in AssemblyInfo.cs class
     // To generate Base64 string for Images below, you can use https://www.base64-image.de/
     [
         Export(typeof(IXrmToolBoxPlugin)),
         ExportMetadata("Name", "Lookup Experience Manager"),
-        ExportMetadata("Description", "This plugin bulk updates lookup controls so that its inline \"New\" button, \"Most Recently Used\", and \"Use Main Form Dialog For (Create/Edit)\" configuration options can be toggled on/off."),
+        ExportMetadata("Description", "This plugin bulk updates lookup controls so that its inline \"New\" button, \"Most Recently Used\", and \"Use Main Form Dialog For (Create/Edit)\" setting options can be toggled on/off."),
         // Please specify the base64 content of a 32x32 pixels image
         ExportMetadata("SmallImageBase64", "iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAHNElEQVR4AcSWCVRU1xnH/w9mg2FYAlMNEis2LkD0iBbRgGIrxBMhKC1gQBFBVIoKitEUbDAhYMAtbhVZCjqAOkIEBJVggAQtWBHEaAARqGyyzbDMysDMvL7nOeTUU5I6Rtp7zv+9++79lt/57n33XD38n9vPAgyT6oLbPa1kUulVMibpBPn52VNkUsEl8puGWrJhoJN8HewTAohI5abr1bdJj8B1nu6b/HCi8DKKxS24NtiK5Jpv4XNgL5wCfLHpUAxZN/DsF4H8B0APOTIYGrMvIyRmL2xd3sWOyEh4eq3F4mXOmLVgHpxcXLB99y5sDN+BJqkYS73dkV1TQVKNeJWKvADQLROTq4P9TBvlYgTF74fMiIEbBYXITjyN/KOpqM0sQtmpLKTGHoVoaBjvrnkf/nt2Yv3OrThZINT+IgCFWuEdvj8KemZG8A4KwNclJfgq6yI8XVyRm5KBuwUlyE8X4HqmECkJx/C+8wroaanqM/QQlRiHmMR4lDV8v0hXiB8rUFxVmVP9pBHu63xQkJsPRcM/cStDiHCfAEy34EOlVYDJ0gPPiAuH+fOwZKo1bDnmEPw1BVKJHL7BGxEc8ad7rwQwTJLh0Ye/gKe/L/qf9aC5+gEunUjGTENTGMoVMB5Vw5RCNSI1gHQQXIUKZtTYStsF+ChoG/KEObB+Zy5IYwNcLCmx1AWCCgs0dbWd6BqR4Q2raagqKsVnW8Ix3YQPlmoMqtZOsHvEMJIqYEZ9mw0rwKAgNb194FEQwe5eYI6o0dzVjhVrVuNMVqpQZ4CSslLYLV0MDYuBxuo6fPieB9SDErTd/wF9dY/QR1VE9kMT9AakEFHzvVW1ED+oh6a7HxZgYP2aP6Kqphrmv56G1o42Z50Burq7weVboE3UAzsbW5gQHJgTTAzUt2AKyYSZnKoE1W+/WgJz2SilMZgOKMDqHgR7WAX337uhpa0dBJuNgaEhXfLj+RJIhyVgGXKgJvRgSG0ylXoM6jEtjHk8DPeLYUgSMNdnYyrHCJArYcRmgUm5asfUMOBwIBKJQJ0D4FB9giB0B5jOnwKFVAIul4um9naMUrtdziHwpt0sjOiTUJFqKEdUUKhHMcZhoZ/ajENcJoznzISE6stGRqCvrw+otTBgsnQHsJk7G22NT8BjG0AyqkSvSg4FE7CYPQPGv7HC0yExNNT/DgYDQ4QGEi4DU+znQcZjQ8PjouTWt1i4wB4Sqlo8DrcdOjQ92tbR0bGju74Zpiw25iycj1PZGVCxGJDoafErp0WYuvgdDCoVGJKPQGNughnLl0BtaY4Btj7qxZ0QXLmM5U7OaGl4jBXOzlfomC+r5wBvm/GtVyx0QOXNcnh4fYC0iwLcrK6EksuG1JAJk/k2sF7lhmm/tce0xQ4YNTGGhAKUUVWKPhoHp/d+B1KpQWl+sfpc/JHdL5ucttOjHwRBaGL3/RlVpeWQKeUI3BWGsAPRyLh5DV3aMSjNLaAw44FhNxcSAw4UBgboHBpA8O7teCrrhpPrMty6Vgb3JSvP0/F00XMA2sHxTWtiz5ZtSD12HGZcLkJ3bsfh5CRsiIzAl/lCVIi7UNzxGMXNDxFxKBYegf5gmZrAz9cPDTV1qMy/gZXzHcvpWLroRwDa6ZN1wfof+W9GRvwxsKlTblvoFtgud0B25ddYnxAF34P7sDMpAT1GJD6MDIWLmyvuX/8HHuSWofxCNnLOHo/IOJO2lo71snoBgFoK7aeBoUTmkVMffJVyHoVZQnAZLLi6umLDpkDs2hOJoKAgzJo+Ay0P6/FlTBxG2vtvcGRjj4yhRebZ0w4XBWkfnzyUsPGVAMadPB2XFT0tvkXUny8gqvOKb19OPK24knBSJPjLF12CqLjOb06m11mJRmPlpXeJiuzs1QcPxq0M2Rx8b4C6oFy4cm5JiiD56CexsWHj8X7u/UIFJjKsuVS4rKfsLrez+O/89usVVt3f3XurtbTS/m/xhw+M2/9h1aq++48aHULCtt45k5ECrrmJRdWD2oQd0Z/Gjdv81Pu/AvyU40Tj1bVPlh5LSmsJCY/AZwkHePUt30dviYxKI0lSfyJ7euy1AtABhzolbycmHL5TXnYTo6MDxP26ks1bw4NKKYgJz+jXDkBDNFfXL00+crx+Kk8fwqw4kJpml8jtfipSKuXT8/+uSQGgE3Q8eWbX1vD44dXcCzj0+X4wCSUC1q/tI2WSBHp+XJMGQCcoEt5wK8ypwKXz+dgfFQo7mzcQ5OfzsbRblEPP05pUgCkz5/VmCUv4hUXfITU1HWGhIVhkPxubA7y9B/t7OyYdgE5gaTlHlCrIs7hztx3p53Lhv8EDbqvs4eO11komGds7qRWgAWhZWdmIkwRFxlXVDUgXZGGNlydIaKibVE/i/wSAhuDz+VJh2mVuw2MJAjbuAdfUEFPeMmyadAA6+bgIS0tFek4BkZWZMyevIG+3AdN87r8AAAD//3JS37YAAAAGSURBVAMArUIEkgAQxHQAAAAASUVORK5CYII="),
         // Please specify the base64 content of a 80x80 pixels image
@@ -26,17 +26,17 @@ namespace BulkLookupConfiguration.XrmToolBoxTool
 
         ExportMetadata("Group", "Lookup | Form Tools | Customizations XML")
     ]
-    public class BulkLookupConfigurationPlugin : PluginBase
+    public class LookupExperienceManagerPlugin : PluginBase
     {
         public override IXrmToolBoxPluginControl GetControl()
         {
-            return new BulkLookupConfigurationControl();
+            return new LookupExperienceManagerControl();
         }
 
         /// <summary>
         /// Constructor 
         /// </summary>
-        public BulkLookupConfigurationPlugin()
+        public LookupExperienceManagerPlugin()
         {
             // If you have external assemblies that you need to load, uncomment the following to 
             // hook into the event that will fire when an Assembly fails to resolve
