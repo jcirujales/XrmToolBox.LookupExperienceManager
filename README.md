@@ -1,6 +1,5 @@
 ﻿# Lookup Experience Manager
-
-**Bulk configure lookup control behavior across ALL forms in a solution — in seconds.**
+Most of the time when a lookup needs to be modified, lookups of the same type most likely need the same updates. It can be cumbersome to find those lookups, the forms they live on, and then have to navigate to each one to make the update. Also needing to find the control on the large forms takes time. For removing the inline New button, the formxml needs to be manually updated and would require the developer to reference API documentation to recall IsInlineNewButton in addition to the steps mentioned prior. 
 
 The Lookup Experience Manager allows the following configurations to be bulk updated for lookup controls without modifying the formxml directly or needing to navigate to each form a control lives on to make the update:
 - Inline New Button
@@ -8,9 +7,6 @@ The Lookup Experience Manager allows the following configurations to be bulk upd
 - Main Form Create 
 - Main Form Edit 
 
-On lookup controls, instead of manually disabling "+ New", hiding MRU, or updating main form dialogs on batches of lookup fields.
-
-This plugin does it **all at once**.
 <img width="1629" height="604" alt="image" src="https://github.com/user-attachments/assets/26952220-9a87-4b86-af08-6e9b50c2c45d" />
 
 ### Features
@@ -29,8 +25,6 @@ This plugin does it **all at once**.
 
 
 ### Why You Need This
-Most of the time when a lookup needs to be modified, lookups of the same type most likely need the same updates. It can be cumbersome to find those lookups, the forms they live on, and then have to navigate to each one to make the update. Also needing to find the control on the large forms takes time. For removing the inline New button, the formxml needs to be manually updated and would require the developer to reference API documentation to recall IsInlineNewButton in addition to the steps mentioned prior. 
-
 | Problem                                                | Solved? |
 |--------------------------------------------------------|---------|
 | Needing to rely on documentation to remove inline +New | YES     |
