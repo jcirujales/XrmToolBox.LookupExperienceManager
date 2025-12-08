@@ -3,13 +3,11 @@ using Microsoft.Xrm.Sdk;
 using System;
 using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Windows.Forms;
 using XrmToolBox.Extensibility;
 using XrmToolBox.LookupExperienceManager.Actions;
 using XrmToolBox.LookupExperienceManager.model;
 using XrmToolBox.LookupExperienceManager.Properties;
-using XrmToolBox.LookupExperienceManager.Services;
 using Label = System.Windows.Forms.Label;
 
 namespace XrmToolBox.LookupExperienceManager

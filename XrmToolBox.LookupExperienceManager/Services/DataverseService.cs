@@ -7,7 +7,6 @@ using Microsoft.Xrm.Sdk.Query;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web.Services.Description;
 using System.Xml.Linq;
 using XrmToolBox.LookupExperienceManager.Model;
 
