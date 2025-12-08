@@ -1,13 +1,13 @@
-﻿using XrmToolBox.LookupExperienceManager.Actions;
-using XrmToolBox.LookupExperienceManager.model;
-using XrmToolBox.LookupExperienceManager.Properties;
-using McTools.Xrm.Connection;
+﻿using McTools.Xrm.Connection;
 using Microsoft.Xrm.Sdk;
 using System;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
 using XrmToolBox.Extensibility;
+using XrmToolBox.LookupExperienceManager.Actions;
+using XrmToolBox.LookupExperienceManager.model;
+using XrmToolBox.LookupExperienceManager.Properties;
 using Label = System.Windows.Forms.Label;
 
 namespace XrmToolBox.LookupExperienceManager
@@ -82,7 +82,6 @@ namespace XrmToolBox.LookupExperienceManager
         private void LookupExperienceManagerControl_Load(object sender, EventArgs e)
         {
             LoadSettings();
-
         }
         private void LoadSettings()
         {
@@ -96,7 +95,6 @@ namespace XrmToolBox.LookupExperienceManager
                 LogInfo("Settings loaded successfully");
             }
         }
-
         private void LoadSolutions_Click()
         {
             SolutionActions.LoadSolutions(this);
@@ -116,16 +114,6 @@ namespace XrmToolBox.LookupExperienceManager
         private void GridTables_SelectionChanged()
         {
             SolutionActions.OnTargetEntitySelect(this, Service);
-        }
-
-        private void InitializeComponent()
-        {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(LookupExperienceManagerControl));
-            this.SuspendLayout();
-            this.Name = "LookupExperienceManagerControl";
-            this.PluginIcon = ((System.Drawing.Icon)(resources.GetObject("$this.PluginIcon")));
-            this.ResumeLayout(false);
-
         }
     }
 }

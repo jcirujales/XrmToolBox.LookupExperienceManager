@@ -135,5 +135,15 @@ namespace XrmToolBox.LookupExperienceManager.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Tables_32 {
+            get {
+                object obj = ResourceManager.GetObject("Tables_32", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
     }
 }

@@ -1,5 +1,4 @@
-﻿using XrmToolBox.LookupExperienceManager.Model;
-using Microsoft.Crm.Sdk.Messages;
+﻿using Microsoft.Crm.Sdk.Messages;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Messages;
 using Microsoft.Xrm.Sdk.Metadata;
@@ -9,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
+using XrmToolBox.LookupExperienceManager.Model;
 
 namespace XrmToolBox.LookupExperienceManager.Services
 {
@@ -77,7 +77,7 @@ namespace XrmToolBox.LookupExperienceManager.Services
             return result;
         }
 
-        public static EntityMetadata GetOneToManyRelationships(string targetEntityLogicalName, IOrganizationService orgService)
+        public static List<OneToManyRelationshipMetadata> GetOneToManyRelationships(string targetEntityLogicalName, IOrganizationService orgService)
         {
             var request = new RetrieveMetadataChangesRequest
             {
@@ -87,7 +87,7 @@ namespace XrmToolBox.LookupExperienceManager.Services
                     {
                         Conditions =
                         {
-                            new MetadataConditionExpression("LogicalName", MetadataConditionOperator.Equals, targetEntityLogicalName)
+                            new MetadataConditionExpression("LogicalName", MetadataConditionOperator.Equals, targetEntityLogicalName),
                         }
                     },
                     RelationshipQuery = new RelationshipQueryExpression
@@ -106,10 +106,49 @@ namespace XrmToolBox.LookupExperienceManager.Services
             };
 
             var response = (RetrieveMetadataChangesResponse)orgService.Execute(request);
+            var targetMetadata = response.EntityMetadata.FirstOrDefault();
 
-            return response.EntityMetadata.FirstOrDefault();
+            if (targetMetadata == null)
+                return new List<OneToManyRelationshipMetadata>();
+
+            var referencingEntityNames = targetMetadata.OneToManyRelationships
+                .Select(r => r.ReferencingEntity)
+                .Distinct()
+                .ToArray();
+
+            var solutionAwareEntities = GetImportableTables(referencingEntityNames, orgService);
+            var solutionAwareLogicalNames = solutionAwareEntities
+                .Select(e => e.LogicalName)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase); // Fast lookup
+
+            var solutionAwareOneToManyRelationships = targetMetadata.OneToManyRelationships
+                .Where(r => solutionAwareLogicalNames.Contains(r.ReferencingEntity))
+                .ToList();
+
+
+            return solutionAwareOneToManyRelationships;
         }
+        public static EntityMetadataCollection GetImportableTables(string[] referencingEntityNames, IOrganizationService orgService)
+        {
+            var entityRequest = new RetrieveMetadataChangesRequest
+            {
+                Query = new EntityQueryExpression
+                {
+                    Criteria = new MetadataFilterExpression(LogicalOperator.And)
+                    {
+                        Conditions =
+                            {
+                                new MetadataConditionExpression("LogicalName", MetadataConditionOperator.In, referencingEntityNames.ToArray()),
+                                new MetadataConditionExpression("IsImportable", MetadataConditionOperator.Equals, true)
+                            }
+                    },
+                }
+            };
 
+            var entityResponse = (RetrieveMetadataChangesResponse)orgService.Execute(entityRequest);
+
+            return entityResponse.EntityMetadata;
+        }
         public static EntityCollection GetFormsContainingLookupField(
             string lookupSchemaName,
             string entityLogicalName,

@@ -50,7 +50,7 @@ namespace XrmToolBox.LookupExperienceManager.Actions
                 Message = $"Finding lookups for {targetEntityLogicalName}...",
                 Work = (worker, args) =>
                 {
-                    var relationships = DataverseService.GetOneToManyRelationships(targetEntityLogicalName, orgService)?.OneToManyRelationships
+                    var relationships = DataverseService.GetOneToManyRelationships(targetEntityLogicalName, orgService)
                         .Where(r =>
                             r.IsCustomizable?.Value == true &&
                             r.IsCustomizable?.CanBeChanged == true &&
@@ -62,8 +62,10 @@ namespace XrmToolBox.LookupExperienceManager.Actions
                             r.ReferencingAttribute != "processinguser" &&
                             r.ReferencingAttribute != "sideloadedpluginownerid" &&
                             r.ReferencingAttribute != "partyid" &&
+                            r.ReferencingAttribute != "objectid" &&
                             r.ReferencingAttribute != "owninguser" &&
-                            r.ReferencingAttribute != "owningteam"
+                            r.ReferencingAttribute != "owningteam" &&
+                            r.ReferencingEntity != "socialactivity" // TODO: Find out how to filter out private tables/relationships that are not solution aware
                         )
                         .ToList();
 
@@ -162,11 +164,9 @@ namespace XrmToolBox.LookupExperienceManager.Actions
         }
         public static void UpdateConfigPanel(LookupExperienceManagerControl mainControl)
         {
-            if (mainControl.isSystemUpdate) return;
-
             var selected = mainControl.gridLookups.Rows.Cast<DataGridViewRow>().Where(r => r.Selected).ToList();
 
-            if (selected.Count == 0)
+            if (mainControl.isSystemUpdate || selected.Count == 0)
             {
                 mainControl.gridLookups.ClearSelection();
                 mainControl.lblConfigMessage.Text = Resources.DefaultLookupSelectionMessage;

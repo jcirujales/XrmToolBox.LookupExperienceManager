@@ -39,8 +39,8 @@ namespace XrmToolBox.LookupExperienceManager
                  Font = new Font("Segoe UI", 10F),
                  Alignment = ToolStripItemAlignment.Right,
                  Margin = new Padding(15, 0, 0, 0),
-                 AutoSize = true
-             };
+                 AutoSize = true,
+            };
 
             mainControl.statusPanel.Controls.Add(mainControl.lblTitle);
 
@@ -116,7 +116,7 @@ namespace XrmToolBox.LookupExperienceManager
             panelTables.Controls.SetChildIndex(mainControl.gridTables, 0);
 
             // MIDDLE: Lookup Controls
-            var panelLookups = CreateModernPanel("Lookup Controls", "Select lookup fields to configure");
+            var panelLookups = CreateModernPanel("Lookup Controls", "Select lookup fields to configure. All related Lookup controls display, some may not be included in the selected solution.");
 
             mainControl.gridLookups = CreateStyledGrid();
             mainControl.gridLookups.MultiSelect = true;
