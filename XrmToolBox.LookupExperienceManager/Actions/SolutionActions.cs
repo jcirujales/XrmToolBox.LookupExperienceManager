@@ -62,7 +62,6 @@ namespace XrmToolBox.LookupExperienceManager.Actions
                             r.ReferencingAttribute != "processinguser" &&
                             r.ReferencingAttribute != "sideloadedpluginownerid" &&
                             r.ReferencingAttribute != "partyid" &&
-                            // r.ReferencingAttribute != "deletedobject" &&
                             r.ReferencingAttribute != "objectid" &&
                             r.ReferencingAttribute != "owninguser" &&
                             r.ReferencingAttribute != "owningteam" &&
