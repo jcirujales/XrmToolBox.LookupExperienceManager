@@ -52,9 +52,9 @@ namespace XrmToolBox.LookupExperienceManager.Actions
                 {
                     var relationships = DataverseService.GetOneToManyRelationships(targetEntityLogicalName, orgService)
                         .Where(r =>
-                            r.IsCustomizable?.Value == true &&
-                            r.IsCustomizable?.CanBeChanged == true &&
-                            r.IsValidForAdvancedFind == true &&
+                            // r.IsCustomizable?.Value == true &&
+                            // r.IsCustomizable?.CanBeChanged == true &&
+                            // r.IsValidForAdvancedFind == true &&
                             r.ReferencingAttribute != "createdby" &&
                             r.ReferencingAttribute != "createdonbehalfby" &&
                             r.ReferencingAttribute != "modifiedby" &&
