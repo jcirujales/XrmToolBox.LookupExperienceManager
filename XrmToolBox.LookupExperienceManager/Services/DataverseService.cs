@@ -77,7 +77,7 @@ namespace XrmToolBox.LookupExperienceManager.Services
             return result;
         }
 
-        public static List<OneToManyRelationshipMetadata> GetOneToManyRelationships(string targetEntityLogicalName, IOrganizationService orgService)
+        public static List<OneToManyRelationshipMetadata> GetOneToManyRelationships(LookupExperienceManagerControl mainControl, string targetEntityLogicalName, IOrganizationService orgService)
         {
             var request = new RetrieveMetadataChangesRequest
             {
@@ -90,6 +90,7 @@ namespace XrmToolBox.LookupExperienceManager.Services
                             new MetadataConditionExpression("LogicalName", MetadataConditionOperator.Equals, targetEntityLogicalName),
                         }
                     },
+                    Properties = new MetadataPropertiesExpression("LogicalName", "IsImportable", "IsCustomizable", "OneToManyRelationships"),
                     RelationshipQuery = new RelationshipQueryExpression
                     {
                         Criteria = new MetadataFilterExpression(LogicalOperator.And)
@@ -97,11 +98,10 @@ namespace XrmToolBox.LookupExperienceManager.Services
                             Conditions =
                             {
                                 new MetadataConditionExpression("RelationshipType", MetadataConditionOperator.Equals, Microsoft.Xrm.Sdk.Metadata.RelationshipType.OneToManyRelationship),
-                                // new MetadataConditionExpression("IsValidForAdvancedFind", MetadataConditionOperator.Equals, true),
-                                // new MetadataConditionExpression("IsCustomizable", MetadataConditionOperator.Equals, true),
                             }
-                        }
-                    }
+                        },
+                        Properties = new MetadataPropertiesExpression("ReferencingAttribute", "ReferencingEntity")
+                    },
                 }
             };
 
@@ -139,9 +139,11 @@ namespace XrmToolBox.LookupExperienceManager.Services
                         Conditions =
                             {
                                 new MetadataConditionExpression("LogicalName", MetadataConditionOperator.In, referencingEntityNames.ToArray()),
-                                new MetadataConditionExpression("IsImportable", MetadataConditionOperator.Equals, true)
+                                new MetadataConditionExpression("IsImportable", MetadataConditionOperator.Equals, true),
+                                new MetadataConditionExpression("IsCustomizable", MetadataConditionOperator.Equals, true)
                             }
                     },
+                    Properties = new MetadataPropertiesExpression("LogicalName", "IsImportable", "IsCustomizable")
                 }
             };
 
@@ -156,7 +158,7 @@ namespace XrmToolBox.LookupExperienceManager.Services
         {
             var query = new QueryExpression("systemform")
             {
-                ColumnSet = new ColumnSet("name", "objecttypecode", "formxml", "type"),
+                ColumnSet = new ColumnSet("name", "objecttypecode", "formxml", "type", "iscustomizable", "ismanaged"),
                 Criteria = new FilterExpression
                 {
                     Conditions =
@@ -164,7 +166,9 @@ namespace XrmToolBox.LookupExperienceManager.Services
                         // Search formxml for the exact datafieldname
                         new ConditionExpression("formxml", ConditionOperator.Like, $"%datafieldname=\"{lookupSchemaName}\"%"),
                         // Only main forms and quick create forms (most common)
-                        new ConditionExpression("type", ConditionOperator.In, 2, 7)
+                        new ConditionExpression("type", ConditionOperator.In, 2, 7),
+                        new ConditionExpression("iscustomizable", ConditionOperator.Equal, true),
+                        new ConditionExpression("ismanaged", ConditionOperator.Equal, false),
                     }
                 }
             };
@@ -191,7 +195,7 @@ namespace XrmToolBox.LookupExperienceManager.Services
 
             return records;
         }
-        public static List<LookupInfo> GetLookupAttributeInfo(List<OneToManyRelationshipMetadata> relationships, IOrganizationService orgService)
+        public static List<LookupInfo> GetLookupAttributeInfo(LookupExperienceManagerControl mainControl, List<OneToManyRelationshipMetadata> relationships, IOrganizationService orgService)
         {
             var results = new List<LookupInfo>();
             foreach (var rel in relationships)
@@ -205,7 +209,7 @@ namespace XrmToolBox.LookupExperienceManager.Services
                 {
                     var formXml = form.GetAttributeValue<string>("formxml");
                     var formConfigSettings = GetLookupConfigurationSettings(formXml, lookupField);
-                    
+
                     results.Add(new LookupInfo
                     {
                         Form = form.GetAttributeValue<string>("name"),
@@ -214,6 +218,8 @@ namespace XrmToolBox.LookupExperienceManager.Services
                         SourceEntity = sourceEntity,
                         Label = formConfigSettings.Label,
                         SchemaName = lookupField,
+                        IsManaged = form.GetAttributeValue<bool>("ismanaged"),
+                        IsCustomizable = form.GetAttributeValue<BooleanManagedProperty>("iscustomizable").Value,
                         DisableMru = formConfigSettings.DisableMru,
                         IsInlineNewEnabled = formConfigSettings.IsInlineNewEnabled,
                         UseMainFormDialogForCreate = formConfigSettings.UseMainFormDialogForCreate,

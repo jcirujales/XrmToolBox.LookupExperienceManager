@@ -116,7 +116,7 @@ namespace XrmToolBox.LookupExperienceManager
             panelTables.Controls.SetChildIndex(mainControl.gridTables, 0);
 
             // MIDDLE: Lookup Controls
-            var panelLookups = CreateModernPanel("Lookup Controls", "Select lookup fields to configure. All related Lookup controls display, some may not be included in the selected solution.");
+            var panelLookups = CreateModernPanel("Lookup Controls", "Select lookup fields to configure. All related Lookup controls display, some may not be included in the selected solution. Only UNMANAGED forms will be displayed.");
 
             mainControl.gridLookups = CreateStyledGrid();
             mainControl.gridLookups.MultiSelect = true;
@@ -166,6 +166,33 @@ namespace XrmToolBox.LookupExperienceManager
                 DataPropertyName = "SchemaName",
                 FillWeight = 25
             };
+            var isManaged = new DataGridViewCheckBoxColumn
+            {
+                HeaderText = "Managed",
+                Name = "ismanaged",
+                DataPropertyName = "ismanaged",
+                FillWeight = 20,
+                ReadOnly = true,
+                Visible = false, // debugging purposes
+            };
+            var isSourceEntityCustomizable = new DataGridViewCheckBoxColumn
+            {
+                HeaderText = "Source Entity Customizable",
+                Name = "issourceentitycustomizable",
+                DataPropertyName = "issourceentitycustomizable",
+                FillWeight = 20,
+                ReadOnly = true,
+                Visible = false, // debugging purposes
+            };
+            var isCustomizable = new DataGridViewCheckBoxColumn
+            {
+                HeaderText = "Customizable",
+                Name = "iscustomizable",
+                DataPropertyName = "iscustomizable",
+                FillWeight = 20,
+                ReadOnly = true,
+                Visible = false, // debugging purposes
+            };
             var disableMRUColumn = new DataGridViewCheckBoxColumn
             {
                 HeaderText = "Disable MRU",
@@ -204,6 +231,9 @@ namespace XrmToolBox.LookupExperienceManager
                 formXmlColumn,
                 labelColumn,
                 LookupSchemaNameColumn,
+                isManaged,
+                isSourceEntityCustomizable,
+                isCustomizable,
                 disableMRUColumn,
                 isInlineEditableColumn,
                 isMainFormCreateEnabledColumn,
