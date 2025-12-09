@@ -7,7 +7,7 @@ The Lookup Experience Manager allows the following configurations to be bulk upd
 - Main Form Create 
 - Main Form Edit 
 
-<img width="1629" height="604" alt="image" src="https://github.com/user-attachments/assets/26952220-9a87-4b86-af08-6e9b50c2c45d" />
+<img width="1536" height="657" alt="LookupExperienceManager_Screenshot" src="https://github.com/user-attachments/assets/065ea997-c6f8-489f-bda8-36cc257a9191" />
 
 ### Features
 
