@@ -97,8 +97,8 @@ namespace XrmToolBox.LookupExperienceManager.Services
                             Conditions =
                             {
                                 new MetadataConditionExpression("RelationshipType", MetadataConditionOperator.Equals, Microsoft.Xrm.Sdk.Metadata.RelationshipType.OneToManyRelationship),
-                                new MetadataConditionExpression("IsValidForAdvancedFind", MetadataConditionOperator.Equals, true),
-                                new MetadataConditionExpression("IsCustomizable", MetadataConditionOperator.Equals, true),
+                                // new MetadataConditionExpression("IsValidForAdvancedFind", MetadataConditionOperator.Equals, true),
+                                // new MetadataConditionExpression("IsCustomizable", MetadataConditionOperator.Equals, true),
                             }
                         }
                     }
