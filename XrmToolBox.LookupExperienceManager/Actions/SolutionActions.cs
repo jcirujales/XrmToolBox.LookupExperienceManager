@@ -1,8 +1,4 @@
-﻿using XrmToolBox.LookupExperienceManager.forms;
-using XrmToolBox.LookupExperienceManager.Model;
-using XrmToolBox.LookupExperienceManager.Properties;
-using XrmToolBox.LookupExperienceManager.Services;
-using Microsoft.Crm.Sdk.Messages;
+﻿using Microsoft.Crm.Sdk.Messages;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Metadata;
 using System;
@@ -12,6 +8,10 @@ using System.Linq;
 using System.Windows.Forms;
 using System.Xml.Linq;
 using XrmToolBox.Extensibility;
+using XrmToolBox.LookupExperienceManager.forms;
+using XrmToolBox.LookupExperienceManager.Model;
+using XrmToolBox.LookupExperienceManager.Properties;
+using XrmToolBox.LookupExperienceManager.Services;
 using Solution = XrmToolBox.LookupExperienceManager.model.Solution;
 
 namespace XrmToolBox.LookupExperienceManager.Actions
@@ -50,11 +50,8 @@ namespace XrmToolBox.LookupExperienceManager.Actions
                 Message = $"Finding lookups for {targetEntityLogicalName}...",
                 Work = (worker, args) =>
                 {
-                    var relationships = DataverseService.GetOneToManyRelationships(targetEntityLogicalName, orgService)
+                    var relationships = DataverseService.GetOneToManyRelationships(mainControl, targetEntityLogicalName, orgService)
                         .Where(r =>
-                            // r.IsCustomizable?.Value == true &&
-                            // r.IsCustomizable?.CanBeChanged == true &&
-                            // r.IsValidForAdvancedFind == true &&
                             r.ReferencingAttribute != "createdby" &&
                             r.ReferencingAttribute != "createdonbehalfby" &&
                             r.ReferencingAttribute != "modifiedby" &&
@@ -69,9 +66,10 @@ namespace XrmToolBox.LookupExperienceManager.Actions
                         )
                         .ToList();
 
-                    var results = DataverseService.GetLookupAttributeInfo(relationships, orgService);
+                    var results = DataverseService.GetLookupAttributeInfo(mainControl, relationships, orgService);
                     var lookups = results
                         .OrderBy(r => r.SourceEntity)
+                        .ThenBy(r => r.Form)
                         .ThenBy(r => r.Label)
                         .ToList();
                     args.Result = lookups;
@@ -84,6 +82,12 @@ namespace XrmToolBox.LookupExperienceManager.Actions
                     {
                         MessageBox.Show(args.Error.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return;
+                    }
+
+                    if (mainControl.selectedTableSchemaName != targetEntityLogicalName)
+                    {
+                        return; // fixes race condition where user could quickly select a different table with shorter retrieval time
+                                // but have its prior selection load from longer retrieval time
                     }
 
                     var lookups = args.Result;
@@ -246,64 +250,108 @@ namespace XrmToolBox.LookupExperienceManager.Actions
                 }
             });
         }
-        public static void SaveAndPublishCustomizations(LookupExperienceManagerControl mainControl, IOrganizationService orgService)
+
+        public static void UnmanagedLayerWarning(LookupExperienceManagerControl mainControl, IOrganizationService orgService)
         {
             var selectedRows = mainControl.gridLookups.SelectedRows.Cast<DataGridViewRow>().ToList();
+
             if (selectedRows.Count == 0)
                 return;
 
+            // Check if any selected form is managed
+            var managedForms = selectedRows
+                .Where(r => r.Cells["IsManaged"]?.Value is bool b && b)
+                .ToList();
+
+            if (managedForms.Any())
+            {
+                var formList = string.Join("\n• ", managedForms.Select(r =>
+                    $"{r.Cells["Form"].Value} ({r.Cells["SourceEntity"].Value})"));
+
+                var result = MessageBox.Show(
+                    $"Warning: {managedForms.Count} selected form(s) are MANAGED:\n\n" +
+                    $"• {formList}\n\n" +
+                    $"Saving changes will create an UNMANAGED layer on top of managed forms.\n" +
+                    $"This is usually safe, but cannot be removed later without deleting the layer. It's recommended to create an unmanaged copy of these forms so that they can be updated instead.\n\n" +
+                    $"Do you want to continue?",
+                    "Managed Forms Detected",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Warning);
+
+                if (result != DialogResult.Yes)
+                    return; // User canceled
+            }
+
+            SolutionActions.SaveAndPublishCustomizations(mainControl, orgService);
+        }
+        public static void SaveAndPublishCustomizations(LookupExperienceManagerControl mainControl, IOrganizationService orgService)
+        {
+            var selectedRows = mainControl.gridLookups.SelectedRows.Cast<DataGridViewRow>().ToList();
+            if (selectedRows.Count == 0) return;
+
             mainControl.WorkAsync(new WorkAsyncInfo
             {
-                Message = $"Saving and publishing {selectedRows.Count} form{(selectedRows.Count > 1 ? "s" : "")}...",
+                Message = $"Saving and publishing {selectedRows.Count} lookup control{(selectedRows.Count > 1 ? "s" : "")}...",
                 Work = (worker, args) =>
                 {
-                    var modifiedForms = new HashSet<string>(); // Track form IDs to publish
+                    var formUpdates = new Dictionary<Guid, XDocument>(); // formId → XDocument (parsed XML)
+                    var entitiesToPublish = new HashSet<string>();
 
                     foreach (DataGridViewRow row in selectedRows)
                     {
                         var schemaName = row.Cells["SchemaName"].Value?.ToString();
                         var sourceEntity = row.Cells["SourceEntity"].Value?.ToString();
-                        var formName = row.Cells["Form"].Value?.ToString();
-                        var formId = new Guid(row.Cells["FormId"].Value?.ToString());
+                        var formIdStr = row.Cells["FormId"].Value?.ToString();
                         var formXml = row.Cells["FormXml"].Value?.ToString();
 
-                        if (string.IsNullOrEmpty(schemaName) || string.IsNullOrEmpty(sourceEntity))
+                        if (string.IsNullOrEmpty(schemaName) ||
+                            string.IsNullOrEmpty(sourceEntity) ||
+                            string.IsNullOrEmpty(formIdStr) ||
+                            string.IsNullOrEmpty(formXml) ||
+                            !Guid.TryParse(formIdStr, out var formId))
                             continue;
 
-                        var formToUpdate = new Entity("systemform", formId)
+                        // Parse once, reuse for all lookups on this form
+                        if (!formUpdates.TryGetValue(formId, out var doc))
                         {
-                            ["formxml"] = formXml
-                        };
+                            doc = XDocument.Parse(formXml);
+                            formUpdates[formId] = doc;
+                        }
 
-                        if (string.IsNullOrEmpty(formXml)) continue;
-
-                        // Parse and update XML
-                        var updatedXml = UpdateFormXmlLookupSettings(
-                            formXml,
+                        // Apply this lookup's settings to the shared document
+                        UpdateFormXmlLookupSettings(
+                            doc,
                             schemaName,
                             mainControl.chkDisableNew.CheckState,
                             mainControl.chkDisableMru.CheckState,
                             mainControl.chkMainFormCreate.CheckState,
-                            mainControl.chkMainFormEdit.CheckState
-                        );
+                            mainControl.chkMainFormEdit.CheckState);
 
-                        if (updatedXml != formXml)
-                        {
-                            // Save updated form
-                            formToUpdate["formxml"] = updatedXml;
-                            orgService.Update(formToUpdate);
-                            modifiedForms.Add(sourceEntity); // Publish entity
-                        }
+                        entitiesToPublish.Add(sourceEntity);
                     }
 
-                    // Publish all modified entities
-                    foreach (var entity in modifiedForms)
+                    // ONE UPDATE PER FORM — elite & fast
+                    foreach (var kvp in formUpdates)
                     {
-                        var request = new PublishXmlRequest
+                        var formId = kvp.Key;
+                        var updatedXml = kvp.Value.ToString();
+
+                        var formToUpdate = new Entity("systemform", formId)
                         {
-                            ParameterXml = $"<importexportxml><entities><entity>{entity}</entity></entities></importexportxml>"
+                            ["formxml"] = updatedXml
                         };
-                        orgService.Execute(request);
+
+                        orgService.Update(formToUpdate);
+                    }
+
+                    // ONE PUBLISH — all affected entities
+                    if (entitiesToPublish.Any())
+                    {
+                        var publishXml = "<importexportxml><entities>" +
+                                         string.Join("", entitiesToPublish.Select(e => $"<entity>{e}</entity>")) +
+                                         "</entities></importexportxml>";
+
+                        orgService.Execute(new PublishXmlRequest { ParameterXml = publishXml });
                     }
 
                     args.Result = selectedRows.Count;
@@ -317,9 +365,10 @@ namespace XrmToolBox.LookupExperienceManager.Actions
                     }
 
                     var count = (int)args.Result;
-                    MessageBox.Show($"Successfully saved and published {count} form{(count > 1 ? "s" : "")}!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show($"Successfully updated and published {count} lookup control{(count > 1 ? "s" : "")}!",
+                        "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                    // Optional: refresh grid
+                    // Refresh current view
                     if (mainControl.gridTables.SelectedRows.Count > 0)
                     {
                         var logicalName = mainControl.gridTables.SelectedRows[0].Cells["schemaName"].Value?.ToString();
@@ -329,17 +378,14 @@ namespace XrmToolBox.LookupExperienceManager.Actions
                 }
             });
         }
-        private static string UpdateFormXmlLookupSettings(
-            string formXml,
+        private static void UpdateFormXmlLookupSettings(
+            XDocument doc,
             string schemaName,
             CheckState isInlineNewEnabled,
             CheckState disableMru,
             CheckState mainFormCreate,
             CheckState mainFormEdit)
         {
-            var doc = XDocument.Parse(formXml);
-            var changed = false;
-
             var controls = doc.Descendants("control")
                 .Where(c => c.Attribute("datafieldname")?.Value == schemaName);
 
@@ -348,24 +394,15 @@ namespace XrmToolBox.LookupExperienceManager.Actions
                 var parameters = control.Element("parameters") ?? new XElement("parameters");
                 if (parameters.Parent == null) control.Add(parameters);
 
-                var settings = new[]
-                    {
-                        (FormXMLAttributes.IsInlineNewEnabled, isInlineNewEnabled),
-                        (FormXMLAttributes.DisableMru, disableMru),
-                        (FormXMLAttributes.UseMainFormDialogForCreate, mainFormCreate),
-                        (FormXMLAttributes.UseMainFormDialogForEdit, mainFormEdit)
-                    };
-                foreach (var (name, state) in settings)
-                {
-                    if (state != CheckState.Indeterminate)
-                    {
-                        UpdateParameter(parameters, name, state == CheckState.Checked);
-                        changed = true;
-                    }
-                }
+                if (isInlineNewEnabled != CheckState.Indeterminate)
+                    UpdateParameter(parameters, "IsInlineNewEnabled", isInlineNewEnabled == CheckState.Checked);
+                if (disableMru != CheckState.Indeterminate)
+                    UpdateParameter(parameters, "DisableMru", disableMru == CheckState.Checked);
+                if (mainFormCreate != CheckState.Indeterminate)
+                    UpdateParameter(parameters, "useMainFormDialogForCreate", mainFormCreate == CheckState.Checked);
+                if (mainFormEdit != CheckState.Indeterminate)
+                    UpdateParameter(parameters, "useMainFormDialogForEdit", mainFormEdit == CheckState.Checked);
             }
-
-            return changed ? doc.ToString() : formXml;
         }
         private static void UpdateParameter(XElement parameters, string name, bool value)
         {

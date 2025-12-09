@@ -50,6 +50,21 @@ The Lookup Experience Manager allows the following configurations to be bulk upd
 
 Done.
 
+⚠️ DISCLAIMER — READ BEFORE USING
+
+This is a **community-developed tool** provided "AS IS" with **no warranty**.
+
+- You are **fully responsible** for any changes made to your environment.
+- **Always test in a sandbox first**.
+- The author is **not liable** for:
+  - Data loss
+  - Broken forms
+  - Solution upgrade issues
+  - Managed layer conflicts
+  - Any direct or indirect damage
+
+By using this tool, you accept all risk.
+
 ### Made For
 
 - Power Platform developers

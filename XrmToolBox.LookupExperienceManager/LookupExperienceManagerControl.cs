@@ -1,5 +1,6 @@
 ﻿using McTools.Xrm.Connection;
 using Microsoft.Xrm.Sdk;
+using Microsoft.Xrm.Sdk.Metadata;
 using System;
 using System.Drawing;
 using System.IO;
@@ -101,7 +102,7 @@ namespace XrmToolBox.LookupExperienceManager
         }
         private void SaveAndPublish_Click()
         {
-            SolutionActions.SaveAndPublishCustomizations(this, Service);
+            SolutionActions.UnmanagedLayerWarning(this, Service);
         }
         private void Refresh_Click()
         {
