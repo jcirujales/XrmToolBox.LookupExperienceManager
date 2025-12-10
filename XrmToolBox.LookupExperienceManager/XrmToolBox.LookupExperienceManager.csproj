@@ -263,7 +263,6 @@
     <None Include="app.config" />
     <None Include="FFire.LookupExperienceManager.1.0.4.nupkg" />
     <None Include="packages.config" />
-    <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="LookupExperienceManagerControl.resx">

@@ -304,6 +304,8 @@ namespace XrmToolBox.LookupExperienceManager
                 Enabled = false,
                 Margin = new Padding(10, 0, 0, 12)
             };
+            mainControl.chkDisableNew.Tag = "When ENABLED: Shows the '+ New' button on lookup fields.\n" +
+                                "When DISABLED: Hides the '+ New' button — prevents inline record creation.";
 
             mainControl.chkDisableMru = new CheckBox
             {
@@ -314,6 +316,8 @@ namespace XrmToolBox.LookupExperienceManager
                 Enabled = false,
                 Margin = new Padding(10, 0, 0, 12)
             };
+            mainControl.chkDisableMru.Tag = "When ENABLED: Hides the 'Recently Used' items at the top of the lookup control.\n" +
+                               "Be cautious that allowing recently used values can unexpectedly show when lookup filters are applied.";
 
             mainControl.chkMainFormCreate = new CheckBox
             {
@@ -324,6 +328,7 @@ namespace XrmToolBox.LookupExperienceManager
                 Enabled = false,
                 Margin = new Padding(10, 0, 0, 12),
             };
+            mainControl.chkMainFormCreate.Tag = "When ENABLED: Clicking '+ New' opens the main form as a dialog (not as a quick create or inline main form).";
 
             mainControl.chkMainFormEdit = new CheckBox
             {
@@ -334,6 +339,23 @@ namespace XrmToolBox.LookupExperienceManager
                 Enabled = false,
                 Margin = new Padding(10, 0, 0, 30)
             };
+            mainControl.chkMainFormEdit.Tag = "When ENABLED: Clicking the lookup value text, a main form opens as a dialog (not as an inline main form).";
+
+            var toolTip = new ToolTip
+            {
+                AutoPopDelay = 10000,
+                InitialDelay = 500,
+                ShowAlways = true,
+                IsBalloon = true,
+                ToolTipIcon = ToolTipIcon.Info,
+                ToolTipTitle = "Lookup Control Setting"
+            };
+
+            // Attach to all checkboxes
+            toolTip.SetToolTip(mainControl.chkDisableNew, mainControl.chkDisableNew.Tag.ToString());
+            toolTip.SetToolTip(mainControl.chkDisableMru, mainControl.chkDisableMru.Tag.ToString());
+            toolTip.SetToolTip(mainControl.chkMainFormCreate, mainControl.chkMainFormCreate.Tag.ToString());
+            toolTip.SetToolTip(mainControl.chkMainFormEdit, mainControl.chkMainFormEdit.Tag.ToString());
 
             mainControl.btnSavePublish = new Button
             {
