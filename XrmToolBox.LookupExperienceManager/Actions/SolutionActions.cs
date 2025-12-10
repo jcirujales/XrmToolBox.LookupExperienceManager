@@ -368,13 +368,7 @@ namespace XrmToolBox.LookupExperienceManager.Actions
                     MessageBox.Show($"Successfully updated and published {count} lookup control{(count > 1 ? "s" : "")}!",
                         "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                    // Refresh current view
-                    if (mainControl.gridTables.SelectedRows.Count > 0)
-                    {
-                        var logicalName = mainControl.gridTables.SelectedRows[0].Cells["schemaName"].Value?.ToString();
-                        if (!string.IsNullOrEmpty(logicalName))
-                            LoadReverseLookupsUsingOneToMany(mainControl, logicalName, orgService);
-                    }
+                    RefreshMetadata(mainControl, orgService);
                 }
             });
         }
