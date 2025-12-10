@@ -281,13 +281,27 @@ namespace XrmToolBox.LookupExperienceManager.Actions
                 if (result != DialogResult.Yes)
                     return; // User canceled
             }
+            mainControl.btnSavePublish.Enabled = false;
+            mainControl.btnSavePublish.Text = "Working...";
 
-            SolutionActions.SaveAndPublishCustomizations(mainControl, orgService);
+            SolutionActions.SaveAndPublishCustomizations(mainControl, orgService, () =>
+            {
+                // This callback runs when WorkAsync finishes (success or error)
+                mainControl.Invoke((MethodInvoker)(() =>
+                {
+                    mainControl.btnSavePublish.Enabled = true;
+                    mainControl.btnSavePublish.Text = "Save & Publish";
+                }));
+            });
         }
-        public static void SaveAndPublishCustomizations(LookupExperienceManagerControl mainControl, IOrganizationService orgService)
+        public static void SaveAndPublishCustomizations(LookupExperienceManagerControl mainControl, IOrganizationService orgService, Action onComplete = null)
         {
             var selectedRows = mainControl.gridLookups.SelectedRows.Cast<DataGridViewRow>().ToList();
-            if (selectedRows.Count == 0) return;
+            if (selectedRows.Count == 0)
+            {
+                onComplete?.Invoke();
+                return;
+            }
 
             mainControl.WorkAsync(new WorkAsyncInfo
             {
@@ -369,6 +383,7 @@ namespace XrmToolBox.LookupExperienceManager.Actions
                         "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                     RefreshMetadata(mainControl, orgService);
+                    onComplete?.Invoke();
                 }
             });
         }
