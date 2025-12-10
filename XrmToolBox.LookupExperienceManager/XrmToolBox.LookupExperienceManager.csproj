@@ -261,7 +261,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="FFire.LookupExperienceManager.1.0.4.nupkg" />
+    <None Include="FFire.LookupExperienceManager.1.0.5.nupkg" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
